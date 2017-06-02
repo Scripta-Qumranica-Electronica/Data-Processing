@@ -149,5 +149,5 @@ $dbh->disconnect();
 
 if (scalar @failed_images > 0){
   print "Some images were not added to database:\n"
-  print "$_\n" for @list;
+  print "$_\n" for @failed_images;
 }
