@@ -148,6 +148,6 @@ sub wanted {
 $dbh->disconnect();
 
 if (scalar @failed_images > 0){
-  print "Some images were not added to database:\n"
+  print "Some images were not added to database:\n";
   print Dumper \@failed_images;
 }
