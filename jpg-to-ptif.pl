@@ -1,4 +1,17 @@
 #!/usr/bin/perl -w
+
+# Bronson Brown-deVost, 02.01.2017
+# This script will read all jpg's from a directory, and convert them into pyramidal tiffs 
+# for iipimage server.  It copies all metadata from the source jpg to the new pyramidal tiff 
+# as well.  
+# The first command line argument is the source folder.
+# The second command line argument is the destination folder to store the new pyramidal tiffs.
+# If neither argument is specified it defaults to the current folder for the source,
+# the destination folder defaults to a folder ptif under the current source folder.
+# This script requires the command line tools vips and exiftool to be installed.
+# It depends on the CPAN modules File::Find, File::Path, and Image::ExifTool.
+# Usage of these modules and external commands falls under their respective licensing.
+
 use strict;
 use warnings;
 use File::Find;
