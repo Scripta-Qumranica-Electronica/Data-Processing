@@ -18,7 +18,7 @@ my @failed_images;
 my $image_file_type = "tif"; #Change this to search for other file types, like tiff
 my $iiif_url = 0;#"http://134.76.19.179/cgi-bin/iipsrv.fcgi";
 
-my $dir = $ARGV[0] ? $ARGV[0] : "/var/www/html/iiif-images";
+my $dir = $ARGV[0] ? $ARGV[0] : "/var/www/html/iiif-images/";
 if (! -e $dir and ! -d $dir) {
     print "\"" . $dir . "\" is not a valid directory!\n";
     print "Please type a valid directory:\n";
