@@ -111,6 +111,7 @@ sub wanted {
       my @id_data = split /-/, $_;
       my $series = substr($id_data[0], 1, 2);
       my $number = substr($id_data[0], 3);
+      $number =~ s/^0+//;
       my $side = 0; # Always recto, which = 0
       my $type = 1; # Always grayscale, which = 1
       my $master = 0; # Never master, so always 0
