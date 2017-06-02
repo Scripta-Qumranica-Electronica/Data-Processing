@@ -98,19 +98,10 @@ sub wanted {
         $sth = $dbh->prepare('INSERT IGNORE INTO SQE_image (url_code, filename, native_width, native_height, dpi, type, wavelength_start, wavelength_end, is_master, image_catalog_id, edition_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
          or die "Couldn't prepare statement: " . $dbh->errstr;
         $sth->execute($iiif_url, $name, $width, $height, $dpi, $type, $wvl_start, $wvl_end, $master, $imageCatalogID, $editionCatalogID);
+        print ("Wrote " . $name . " to database.\n")
       } else {
         push @failed_images, $name;
       }
-      # my $platefragUID;
-      # while (my @data = $sth->fetchrow_array()) {
-      #   $platefragUID = $data[0];
-      # }
-
-      #We insert the record if it doesn't already exist, the URL is unique.
-      # $sth = $dbh->prepare('INSERT IGNORE INTO SQE_image (url, native_width, native_height, dpi, type, catalogue_id, is_master) VALUES (?, ?, ?, ?, ?, ?, ?)')
-      #   or die "Couldn't prepare statement: " . $dbh->errstr;
-      # $sth->execute('http://134.76.19.179/cgi-bin/iipsrv.fcgi?IIIF=' . $name,
-      #               $width, $height, $dpi, $type, $platefragUID, $master);
     }
 
     if($_ =~ m/^M.*$image_file_type$/) {
@@ -132,19 +123,20 @@ sub wanted {
       my $wvl_end = 900;
       my $master = 0; # Never master, so always 0
       my $institution = "PAM";
-      print ("Add entry: " . $institution . ", series: " . $series . ", number: " . $number . ", side: " . $side . ".\n");
 
       $sth = $dbh->prepare('INSERT INTO image_catalog (institution, catalog_number_1, catalog_number_2, catalog_side) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE image_catalog_id=LAST_INSERT_ID(image_catalog_id)')
          or die "Couldn't prepare statement: " . $dbh->errstr;
         $sth->execute($institution, $series, $number, $side);
 
       my $imageCatalogID = $sth->{ mysql_insertid };
+      print ("Added entry: " . $institution . ", series: " . $series . ", number: " . $number . ", side: " . $side . ", with catalog_id: " . $imageCatalogID . ".\n");
 
       if ($imageCatalogID) {
         #We insert the record if it doesn't already exist, the URL+filename is unique.
         $sth = $dbh->prepare('INSERT IGNORE INTO SQE_image (url_code, filename, native_width, native_height, dpi, type, wavelength_start, wavelength_end, is_master, image_catalog_id, edition_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
          or die "Couldn't prepare statement: " . $dbh->errstr;
         $sth->execute($iiif_url, $name, $width, $height, $dpi, $type, $wvl_start, $wvl_end, $master, $imageCatalogID, undef);
+        print ("Wrote " . $name . " to database.\n")
       } else {
         push @failed_images, $name;
       }
