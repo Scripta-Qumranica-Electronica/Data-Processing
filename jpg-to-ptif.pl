@@ -10,7 +10,7 @@
 # the destination folder defaults to a folder ptif under the current source folder.
 # This script requires the command line tools vips and exiftool to be installed.
 # It depends on the CPAN modules File::Find, File::Path, and Image::ExifTool.
-# Usage of these modules and external commands falls under their respective licensing.
+# Usage of the CPAN modules and external vips and exiftool commands falls under their respective licensing.
 
 use strict;
 use warnings;
