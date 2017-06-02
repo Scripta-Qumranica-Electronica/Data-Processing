@@ -60,7 +60,8 @@ sub wanted {
         $side = 1;
       }
 
-      my $wvl_start, $wvl_end;
+      my $wvl_start;
+      my $wvl_end;
       if ($type =~ /LR445/) { #We will probably need a legend for types, 0=color, 1=IR, 2 and 3 are raking light.
         $type = 0;
         $wvl_start = 445;
