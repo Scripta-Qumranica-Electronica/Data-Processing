@@ -125,7 +125,7 @@ sub wanted {
       my $master = 0; # Never master, so always 0
       my $institution = "PAM";
 
-      $sth = $dbh->prepare('INSERT INTO image_catalog (institution, catalog_number_1, catalog_number_2, catalog_side) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE image_catalog_id=LAST_INSERT_ID(image_catalog_id)')
+      my $sth = $dbh->prepare('INSERT INTO image_catalog (institution, catalog_number_1, catalog_number_2, catalog_side) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE image_catalog_id=LAST_INSERT_ID(image_catalog_id)')
          or die "Couldn't prepare statement: " . $dbh->errstr;
         $sth->execute($institution, $series, $number, $side);
 
