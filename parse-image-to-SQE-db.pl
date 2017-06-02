@@ -94,7 +94,7 @@ sub wanted {
         $editionCatalogID = @{$catalogInfo}[0]->{edition_catalog_id};
       }
 
-      if ($imageCatalogID && $editionCatalogID) {
+      if ($imageCatalogID) {
         #We insert the record if it doesn't already exist, the URL+filename is unique.
         $sth = $dbh->prepare('INSERT INTO SQE_image (url_code, filename, native_width, native_height, dpi, type, wavelength_start, wavelength_end, is_master, image_catalog_id, edition_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE sqe_image_id=LAST_INSERT_ID(sqe_image_id)')
          or die "Couldn't prepare statement: " . $dbh->errstr;
