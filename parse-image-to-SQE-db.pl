@@ -1,4 +1,14 @@
 #!/usr/bin/perl -w
+
+# Bronson Brown-deVost, 02.06.2017
+# This script is mainly for Göttingen IT use.
+# This parses a directory of images files, IAA or PAM, and adds entries
+# into the SQE_image table of the SQE database.  In the case of PAM images,
+# it also creates an entry in the image_catalog table.
+# This script depends on the perl CPAN modules File::Find, DBI, Image::ExifTool,
+# Image::Size, and Data::Dumper.  Once compiled, this program may be subject
+# to the licenses of those modules.
+
 use strict;
 use warnings;
 use File::Find;
@@ -14,15 +24,14 @@ my $dbh  = SQE_database::get_dbh;
 
 print 'Starting:'  . "\n";
 my @failed_images;
-#my %split_images;
 my $image_file_type = "tif"; #Change this to search for other file types, like tiff
-my $iiif_url = 0;#"http://134.76.19.179/cgi-bin/iipsrv.fcgi";
+my $iiif_url = 0; #id 0 points to "http://134.76.19.179/cgi-bin/iipsrv.fcgi" in the database.
 
 my $dir = $ARGV[0] ? $ARGV[0] : "/var/www/html/iiif-images/";
 if (! -e $dir and ! -d $dir) {
     print "\"" . $dir . "\" is not a valid directory!\n";
     print "Please type a valid directory:\n";
-    print "perl parse-iaa-images.pl /Users/user/images\n";
+    print "perl parse-image-to-SQE-db.pl /Users/user/images\n";
     exit;
 }
 
@@ -54,6 +63,7 @@ sub wanted {
   		$type =~ s/__(.*)$//g;
       my $master = $type =~ /LR445/ && $side =~ /R/ ? 1 : 0;
 
+      #Adjustments to accommodate SQE database structure
       if ($side eq 'R'){ #Side is a boolean 0=Recto, 1=Verso.
         $side = 0;
       } else {
@@ -80,7 +90,7 @@ sub wanted {
         $wvl_end = 924;
       }
       
-      #We find the catalog_id and edition_id of the plate and fragment.
+      #We find the catalog_id and edition_id corresponding to the current plate and fragment.
       my $sth = $dbh->prepare('CALL getCatalogAndEdition(?,?,?);')
           or die "Couldn't prepare statement: " . $dbh->errstr;
       $sth->execute($plate, $fragment, $side);
@@ -111,7 +121,7 @@ sub wanted {
         push @failed_images, $name;
       }
     }
-
+    # Parse PAM image
     if($_ =~ m/^M.*$image_file_type$/) {
       #Image data
       my $info = $exifTool->ImageInfo($File::Find::name, @tagList);
@@ -132,6 +142,7 @@ sub wanted {
       my $master = 0; # Never master, so always 0
       my $institution = "PAM";
 
+      # Insert a new record in image_catalog and get the primary key
       my $sth = $dbh->prepare('INSERT INTO image_catalog (institution, catalog_number_1, catalog_number_2, catalog_side) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE image_catalog_id=LAST_INSERT_ID(image_catalog_id)')
          or die "Couldn't prepare statement: " . $dbh->errstr;
         $sth->execute($institution, $series, $number, $side);
@@ -160,6 +171,7 @@ sub wanted {
 
 $dbh->disconnect();
 
+# Return a list of failures that must be fixed
 if (scalar @failed_images > 0){
   print "Some images were not added to database:\n";
   print Dumper \@failed_images;
