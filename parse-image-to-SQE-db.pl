@@ -13,10 +13,10 @@ use Data::Dumper;
 my $dbh  = SQE_database::get_dbh;
 
 print 'Starting:'  . "\n";
-#my %image_data;
+my @failed_images;
 #my %split_images;
 my $image_file_type = "tif"; #Change this to search for other file types, like tiff
-my $iiif_url = "http://134.76.19.179/cgi-bin/iipsrv.fcgi";
+my $iiif_url = 0;#"http://134.76.19.179/cgi-bin/iipsrv.fcgi";
 
 my $dir = $ARGV[0] ? $ARGV[0] : "/var/www/html/iiif-images";
 if (! -e $dir and ! -d $dir) {
@@ -60,14 +60,23 @@ sub wanted {
         $side = 1;
       }
 
+      my $wvl_start, $wvl_end;
       if ($type =~ /LR445/) { #We will probably need a legend for types, 0=color, 1=IR, 2 and 3 are raking light.
         $type = 0;
+        $wvl_start = 445;
+        $wvl_end = 704;
       } elsif ($type =~ /RLIR/) {
         $type = 2;
+        $wvl_start = 924;
+        $wvl_end = 924;
       } elsif ($type =~ /RRIR/){
         $type = 3;
+        $wvl_start = 924;
+        $wvl_end = 924;
       } else {
         $type = 1;
+        $wvl_start = 924;
+        $wvl_end = 924;
       }
       
       #We find the catalog_id and edition_id of the plate and fragment.
@@ -85,7 +94,12 @@ sub wanted {
       }
 
       if ($imageCatalogID && $editionCatalogID) {
-        print ($imageCatalogID . " " . $editionCatalogID . "\n");
+        #We insert the record if it doesn't already exist, the URL+filename is unique.
+        $sth = $dbh->prepare('INSERT IGNORE INTO SQE_image (url_code, filename, native_width, native_height, dpi, type, wavelength_start, wavelength_end, is_master, image_catalog_id, edition_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+         or die "Couldn't prepare statement: " . $dbh->errstr;
+        $sth->execute($iiif_url, $name, $width, $height, $dpi, $type, $wvl_start, $wvl_end, $master, $imageCatalogID, $editionCatalogID);
+      } else {
+        push @failed_images, $name;
       }
       # my $platefragUID;
       # while (my @data = $sth->fetchrow_array()) {
@@ -114,12 +128,33 @@ sub wanted {
       $number =~ s/^0+//;
       my $side = 0; # Always recto, which = 0
       my $type = 1; # Always grayscale, which = 1
+      my $wvl_start = 700;
+      my $wvl_end = 900;
       my $master = 0; # Never master, so always 0
       my $institution = "PAM";
       print ("Add entry: " . $institution . ", series: " . $series . ", number: " . $number . ", side: " . $side . ".\n");
+
+      $sth = $dbh->prepare('INSERT INTO image_catalog (institution, catalog_number_1, catalog_number_2, catalog_side) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE image_catalog_id=LAST_INSERT_ID(image_catalog_id)')
+         or die "Couldn't prepare statement: " . $dbh->errstr;
+        $sth->execute($institution, $series, $number, $side);
+
+      my $imageCatalogID = $sth->{ mysql_insertid };
+
+      if ($imageCatalogID) {
+        #We insert the record if it doesn't already exist, the URL+filename is unique.
+        $sth = $dbh->prepare('INSERT IGNORE INTO SQE_image (url_code, filename, native_width, native_height, dpi, type, wavelength_start, wavelength_end, is_master, image_catalog_id, edition_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+         or die "Couldn't prepare statement: " . $dbh->errstr;
+        $sth->execute($iiif_url, $name, $width, $height, $dpi, $type, $wvl_start, $wvl_end, $master, $imageCatalogID, undef);
+      } else {
+        push @failed_images, $name;
+      }
     }
   }
 }
 
 $dbh->disconnect();
 
+if (scalar @failed_images > 0){
+  print "Some images were not added to database:\n"
+  print "$_\n" for @list;
+}
