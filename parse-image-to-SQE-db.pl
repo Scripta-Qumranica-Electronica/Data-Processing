@@ -46,6 +46,7 @@ sub wanted {
   		$plate =~ s/^P//g;
       my $fragment = $subStr[1];
   		$fragment =~ s/^Fg//g;
+      $fragment =~ s/^0+//;
       my $side = $subStr[2];
       my $date = substr($subStr[5], 1);
       my $time = substr($subStr[6], 1);
