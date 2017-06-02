@@ -99,7 +99,7 @@ sub wanted {
         $sth = $dbh->prepare('INSERT IGNORE INTO SQE_image (url_code, filename, native_width, native_height, dpi, type, wavelength_start, wavelength_end, is_master, image_catalog_id, edition_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
          or die "Couldn't prepare statement: " . $dbh->errstr;
         $sth->execute($iiif_url, $name, $width, $height, $dpi, $type, $wvl_start, $wvl_end, $master, $imageCatalogID, $editionCatalogID);
-        print ("Wrote " . $name . " to database.\n")
+        print ("Wrote " . $name . " to database.\n");
       } else {
         push @failed_images, $name;
       }
@@ -137,7 +137,7 @@ sub wanted {
         $sth = $dbh->prepare('INSERT IGNORE INTO SQE_image (url_code, filename, native_width, native_height, dpi, type, wavelength_start, wavelength_end, is_master, image_catalog_id, edition_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
          or die "Couldn't prepare statement: " . $dbh->errstr;
         $sth->execute($iiif_url, $name, $width, $height, $dpi, $type, $wvl_start, $wvl_end, $master, $imageCatalogID, undef);
-        print ("Wrote " . $name . " to database.\n")
+        print ("Wrote " . $name . " to database.\n");
       } else {
         push @failed_images, $name;
       }
