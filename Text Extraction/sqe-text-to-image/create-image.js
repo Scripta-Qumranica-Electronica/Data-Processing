@@ -29,8 +29,9 @@ const colID = args.c
 const session_id = args.i || 'B2A50B52-E1CE-11E8-A12D-E5B7EAEE5222'
 const font = args.f || 'DSS 4Q51'
 const fileName = args.o || 'output.png'
-const lineHeight = args.h || '2'
-const spacing = args.w || '3'
+const lineHeight = args.h || 2
+const spacing = args.w || 3
+const fontSize = 12
 
 const attrValue = {
     "1":"LETTER",
@@ -173,6 +174,7 @@ const processCol = async () => {
       line-height: ${lineHeight}px;   /* within paragraph */
       margin-bottom: 0px;
       font-family: "${font}";
+      font-size: ${fontSize}px;
     }
 
     sup, sub {
@@ -205,14 +207,19 @@ const processCol = async () => {
     //color: red;
     }
 
-    span.ABOVE_LINE {
-    font-size: small;
-    vertical-align: super;
+    sup {
+    position: relative;
+    top: -1em;
+    font-size: 50%;
+    vertical-align: top;
+    //vertical-align: super;
     }
 
-    span.BELOW_LINE {
-    font-size: small;
-    vertical-align: sub;
+    sub {
+    position: relative;
+    font-size: 50%;
+    bottom: -1em;
+    vertical-align: bottom;
     }
 
     div.hide-reconstructed-text span.SCROLL_START {
@@ -256,11 +263,11 @@ const processCol = async () => {
             request.continue();
         }
     })
-
+    //console.log(htmlString)
     await page.goto('data:text/html;charset=UTF-8,' + htmlString, {waitUntil: 'networkidle0'})
-    page.setViewport({width: (longestLine * 8), height: (numberOfLines * (lineHeight + 18)), deviceScaleFactor: 3})
+    page.setViewport({width: Math.floor(longestLine * fontSize * 0.75), height: Math.floor(numberOfLines * (lineHeight + fontSize) * fontSize * 0.1), deviceScaleFactor: 3})
     await page.screenshot({path: fileName,
-        clip: {x: 0, y:0, width: (longestLine * 8), height: (numberOfLines * (lineHeight + 18))}
+        clip: {x: 0, y:0, width: Math.floor(longestLine * fontSize * 0.75), height: Math.floor(numberOfLines * (lineHeight + fontSize) * fontSize * 0.1)}
     })
 
     browser.close()
