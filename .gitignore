@@ -1,1 +1,3 @@
 .vstags
+.vscode
+node_modules

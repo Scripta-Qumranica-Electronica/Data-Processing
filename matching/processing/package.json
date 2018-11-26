@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "array-to-csv": "^1.0.1",
+    "chalk": "^2.4.1",
+    "mariadb": "^2.0.1-beta",
+    "roman-numeral-to-decimal": "^1.0.1"
+  }
+}
