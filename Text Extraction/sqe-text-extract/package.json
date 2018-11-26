@@ -11,6 +11,6 @@
   },
   "license": "MIT",
   "dependencies": {
-    "mariadb": "^0.7.0"
+    "mariadb": "^2.0.1-beta"
   }
 }
