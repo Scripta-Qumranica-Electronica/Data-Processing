@@ -9,6 +9,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"io/ioutil"
+    "path/filepath"
 	"log"
 	"strings"
 
@@ -35,8 +36,9 @@ func init() {
 }
 
 func main() {
-	dir := "/Users/bronson/School/Programming/JSON1/"
-	files, err := ioutil.ReadDir(dir)
+	dir := "./Data/No-japanese-paper-10-18/"
+    absPath, _ := filepath.Abs(dir)
+	files, err := ioutil.ReadDir(absPath)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -100,9 +102,10 @@ SELECT sqe_image_id,
 	edition_location_2, 
 	scroll_version_id
 FROM SQE_image
+    JOIN image_to_edition_catalog USING(image_catalog_id)
 	JOIN edition_catalog USING(edition_catalog_id)
-	JOIN scroll_data ON scroll_data.name = edition_catalog.composition
-	JOIN scroll_version USING(scroll_id)
+	JOIN scroll_version_group USING(scroll_id)
+	JOIN scroll_version USING(scroll_version_group_id)
 WHERE filename=?`,
 		img)
 	checkErr(err, "n")
@@ -117,21 +120,29 @@ WHERE filename=?`,
 	}
 
 	if sqeID != 0 {
-		data, err := db.Exec(
+        data, err := db.Exec(
 			`
-	INSERT INTO artefact (region_in_master_image, sqe_image_id) 
-		VALUES (ST_GeomFromGeoJSON(?), ?) 
-	ON DUPLICATE KEY UPDATE artefact_id=LAST_INSERT_ID(artefact_id)`,
-			record, sqeID)
+	INSERT INTO artefact () 
+		VALUES ()`)
 		checkErr(err, img)
 		var artID int64
 		artID, err = data.LastInsertId()
+        
+		data, err = db.Exec(
+			`
+	INSERT INTO artefact_shape (artefact_id, region_in_sqe_image, id_of_sqe_image) 
+		VALUES (?, ST_GeomFromGeoJSON(?), ?)
+    ON DUPLICATE KEY UPDATE artefact_shape_id=LAST_INSERT_ID(artefact_shape_id)`,
+			artID, record, sqeID)
+		checkErr(err, img)
+        var artShapeID int64
+		artShapeID, err = data.LastInsertId()
 
 		data, err = db.Exec(
 			`
-	INSERT INTO artefact_owner (artefact_id, scroll_version_id) 
+	INSERT INTO artefact_shape_owner (artefact_shape_id, scroll_version_id) 
 		VALUES (?, ?)`,
-			artID, scrollVerID)
+			artShapeID, scrollVerID)
 		checkErr(err, img)
 
 		data, err = db.Exec(
