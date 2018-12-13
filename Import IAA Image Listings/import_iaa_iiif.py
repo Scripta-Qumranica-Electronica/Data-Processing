@@ -43,7 +43,7 @@ def main(argv):
 
     cnxpool = MySQLConnectionPool(
         pool_name = "mypool",
-        pool_size = 30,
+        pool_size = 10,
         **dbconfig)
 
     db = cnxpool.get_connection()
