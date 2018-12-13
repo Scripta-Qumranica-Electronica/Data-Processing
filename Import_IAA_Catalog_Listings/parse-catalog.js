@@ -194,14 +194,14 @@ const parseMasada = (reference) => {
         let volMatch = volPat.exec(reference)
         let vol = volMatch && volMatch[1]
         if (!vol) {
-            volPat = /Masada (.*)( |,)/
+            volPat = /Masada (.*?)[ ,]/
             volMatch = volPat.exec(reference)
             vol = volMatch && volMatch[1]
         }
             
         const platePat = /.*pl\.(.*)/
         const plateMatch = platePat.exec(reference)
-        const plate = plateMatch ? plateMatch[1].split(':')[0] : /.* .* (.*)/.exec(reference)[1]
+        const plate = plateMatch ? plateMatch[1].split(':')[0] : /[A-z]* [A-z,]* (.*)/.exec(reference)[1]
 
         let frag = null
         if (plateMatch && plateMatch[1].split(':')[1]) {

@@ -59440,8 +59440,8 @@
     "plate": "(*81)",
     "fragment": "1",
     "edition": "MAS",
-    "volume": null,
-    "ed_plate": "93",
+    "volume": "VI",
+    "ed_plate": "Illustration 10, page 93",
     "ed_fragment": null
   },
   {
@@ -59449,8 +59449,8 @@
     "plate": "(*81)",
     "fragment": "2",
     "edition": "MAS",
-    "volume": null,
-    "ed_plate": "93",
+    "volume": "VI",
+    "ed_plate": "Illustration 10, page 93",
     "ed_fragment": null
   },
   {
@@ -59620,7 +59620,7 @@
     "plate": "(*237)",
     "fragment": "1",
     "edition": "MAS",
-    "volume": null,
+    "volume": "VI",
     "ed_plate": "Ill.9",
     "ed_fragment": null
   },
@@ -75163,7 +75163,7 @@
     "plate": "(*63)",
     "fragment": "1",
     "edition": "MAS",
-    "volume": null,
+    "volume": "II",
     "ed_plate": "7",
     "ed_fragment": "738"
   },
@@ -75172,7 +75172,7 @@
     "plate": "(*63)",
     "fragment": "5",
     "edition": "MAS",
-    "volume": null,
+    "volume": "II",
     "ed_plate": "7",
     "ed_fragment": "738"
   },
@@ -75181,7 +75181,7 @@
     "plate": "(*63)",
     "fragment": "7",
     "edition": "MAS",
-    "volume": null,
+    "volume": "II",
     "ed_plate": "7",
     "ed_fragment": "738"
   },
@@ -83614,7 +83614,7 @@
     "plate": "(*238)",
     "fragment": "1",
     "edition": "MAS",
-    "volume": null,
+    "volume": "6",
     "ed_plate": "8 (pages 210-211)",
     "ed_fragment": null
   },
@@ -83623,7 +83623,7 @@
     "plate": "(*238)",
     "fragment": "2",
     "edition": "MAS",
-    "volume": null,
+    "volume": "6",
     "ed_plate": "8 (pages 210-211)",
     "ed_fragment": null
   },
@@ -83632,7 +83632,7 @@
     "plate": "(*238)",
     "fragment": "3",
     "edition": "MAS",
-    "volume": null,
+    "volume": "6",
     "ed_plate": "8 (pages 210-211)",
     "ed_fragment": null
   },

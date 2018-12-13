@@ -1,0 +1,12 @@
+{
+  "name": "Import_IAA_Catalog_Listings",
+  "version": "1.0.0",
+  "description": "Tools to parse the IAA Menorah DSS references",
+  "main": "parse-catalog.js",
+  "author": "Bronson Brown-deVost",
+  "license": "MIT",
+  "dependencies": {
+    "csvtojson": "^2.0.8",
+    "minimist": "^1.2.0"
+  }
+}
