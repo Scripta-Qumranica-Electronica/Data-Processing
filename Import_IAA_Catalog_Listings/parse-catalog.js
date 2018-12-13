@@ -269,7 +269,7 @@ const editions = {
 }
 
 
-const defaultFilePath = './Data/Fragment on plate to DJD 27042017.csv'
+const defaultFilePath = './Data/Fragment-on-plate-to-DJD-27042017-cleaned.tsv'
 let failed = []
 let writeQueue = []
 if (!args.f) {

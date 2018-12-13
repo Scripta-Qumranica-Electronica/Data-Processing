@@ -1665,6 +1665,15 @@
     "ed_fragment": "4"
   },
   {
+    "manuscript": "4Q111",
+    "plate": "-667",
+    "fragment": "1",
+    "edition": "DJD",
+    "volume": "16",
+    "ed_plate": "XXVII",
+    "ed_fragment": "1. In publication, but not on PAM used for p"
+  },
+  {
     "manuscript": "4Q299",
     "plate": "-592",
     "fragment": "1",
@@ -10228,7 +10237,7 @@
     "plate": "-518",
     "fragment": "24",
     "edition": "DJD",
-    "volume": null,
+    "volume": "11",
     "ed_plate": "XXIII",
     "ed_fragment": "(probably from 11a)"
   },
@@ -10255,7 +10264,7 @@
     "plate": "-518",
     "fragment": "17",
     "edition": "DJD",
-    "volume": null,
+    "volume": "11",
     "ed_plate": "XXVII",
     "ed_fragment": "30"
   },
@@ -10318,7 +10327,7 @@
     "plate": "-518",
     "fragment": "25",
     "edition": "DJD",
-    "volume": null,
+    "volume": "11",
     "ed_plate": "XXIII",
     "ed_fragment": "(probably from 11a)"
   },
@@ -10327,7 +10336,7 @@
     "plate": "-518",
     "fragment": "32",
     "edition": "DJD",
-    "volume": null,
+    "volume": "11",
     "ed_plate": "XXIII",
     "ed_fragment": "12"
   },
@@ -10354,7 +10363,7 @@
     "plate": "-518",
     "fragment": "16",
     "edition": "DJD",
-    "volume": null,
+    "volume": "11",
     "ed_plate": "XXVII",
     "ed_fragment": "29"
   },
@@ -10363,7 +10372,7 @@
     "plate": "-518",
     "fragment": "23",
     "edition": "DJD",
-    "volume": null,
+    "volume": "11",
     "ed_plate": "XXIII",
     "ed_fragment": "11a"
   },
@@ -10372,7 +10381,7 @@
     "plate": "-518",
     "fragment": "20",
     "edition": "DJD",
-    "volume": null,
+    "volume": "11",
     "ed_plate": "XXIII",
     "ed_fragment": "11a"
   },
@@ -10381,7 +10390,7 @@
     "plate": "-518",
     "fragment": "19",
     "edition": "DJD",
-    "volume": null,
+    "volume": "11",
     "ed_plate": "XXIII",
     "ed_fragment": "11a"
   },
@@ -10390,7 +10399,7 @@
     "plate": "-518",
     "fragment": "21",
     "edition": "DJD",
-    "volume": null,
+    "volume": "11",
     "ed_plate": "XXIII",
     "ed_fragment": "11b"
   },
@@ -10399,7 +10408,7 @@
     "plate": "-518",
     "fragment": "29",
     "edition": "DJD",
-    "volume": null,
+    "volume": "11",
     "ed_plate": "XXIII",
     "ed_fragment": "12"
   },
@@ -10408,7 +10417,7 @@
     "plate": "-518",
     "fragment": "28",
     "edition": "DJD",
-    "volume": null,
+    "volume": "11",
     "ed_plate": "XXIII",
     "ed_fragment": "13a"
   },
@@ -10417,7 +10426,7 @@
     "plate": "-518",
     "fragment": "26",
     "edition": "DJD",
-    "volume": null,
+    "volume": "11",
     "ed_plate": "XXIII",
     "ed_fragment": "13b"
   },
@@ -10426,7 +10435,7 @@
     "plate": "-518",
     "fragment": "27",
     "edition": "DJD",
-    "volume": null,
+    "volume": "11",
     "ed_plate": "XXIII",
     "ed_fragment": "13b"
   },
@@ -10435,7 +10444,7 @@
     "plate": "-518",
     "fragment": "22",
     "edition": "DJD",
-    "volume": null,
+    "volume": "11",
     "ed_plate": "XXVII",
     "ed_fragment": "35"
   },
@@ -11274,7 +11283,7 @@
     "edition": "BE",
     "volume": null,
     "ed_plate": "XVI",
-    "ed_fragment": "a \t"
+    "ed_fragment": "a"
   },
   {
     "manuscript": "4Q205",
@@ -13046,8 +13055,8 @@
     "fragment": "4",
     "edition": "DJD",
     "volume": "11",
-    "ed_plate": "",
-    "ed_fragment": "XVI:5."
+    "ed_plate": "XVI",
+    "ed_fragment": "5."
   },
   {
     "manuscript": "4Q400",
@@ -15325,6 +15334,15 @@
     "volume": "11",
     "ed_plate": "III",
     "ed_fragment": "7a+7c+7d"
+  },
+  {
+    "manuscript": "4Q286",
+    "plate": "-692",
+    "fragment": "2",
+    "edition": "DJD",
+    "volume": "11",
+    "ed_plate": "III",
+    "ed_fragment": "7"
   },
   {
     "manuscript": "4Q319",
@@ -29695,7 +29713,7 @@
     "plate": "-299",
     "fragment": "1",
     "edition": "DJD",
-    "volume": null,
+    "volume": "7",
     "ed_plate": "XXVIII",
     "ed_fragment": "1"
   },
@@ -29704,7 +29722,7 @@
     "plate": "-299",
     "fragment": "2",
     "edition": "DJD",
-    "volume": null,
+    "volume": "7",
     "ed_plate": "XXVIII",
     "ed_fragment": "2"
   },
@@ -32510,6 +32528,15 @@
   {
     "manuscript": "4Q1",
     "plate": "-391",
+    "fragment": "10",
+    "edition": "DJD",
+    "volume": "12",
+    "ed_plate": "III",
+    "ed_fragment": "24"
+  },
+  {
+    "manuscript": "4Q1",
+    "plate": "-391",
     "fragment": "11",
     "edition": "DJD",
     "volume": "12",
@@ -32782,7 +32809,7 @@
     "plate": "-406",
     "fragment": "10",
     "edition": "DJD",
-    "volume": null,
+    "volume": "17",
     "ed_plate": "XXVII",
     "ed_fragment": "5a"
   },
@@ -32809,7 +32836,7 @@
     "plate": "-406",
     "fragment": "11",
     "edition": "DJD",
-    "volume": null,
+    "volume": "17",
     "ed_plate": "XXVI",
     "ed_fragment": "13 (no photo)"
   },
@@ -32818,7 +32845,7 @@
     "plate": "-406",
     "fragment": "12",
     "edition": "DJD",
-    "volume": null,
+    "volume": "17",
     "ed_plate": "XXVI",
     "ed_fragment": "14 (no photo)"
   },
@@ -57145,7 +57172,7 @@
     "plate": "-518",
     "fragment": "31",
     "edition": "DJD",
-    "volume": null,
+    "volume": "11",
     "ed_plate": "XXIII",
     "ed_fragment": "12"
   },
@@ -57154,7 +57181,7 @@
     "plate": "-518",
     "fragment": "30",
     "edition": "DJD",
-    "volume": null,
+    "volume": "11",
     "ed_plate": "XXIII",
     "ed_fragment": "12"
   },
@@ -57667,7 +57694,7 @@
     "plate": "-158",
     "fragment": "3",
     "edition": "DJD",
-    "volume": null,
+    "volume": "37",
     "ed_plate": "III",
     "ed_fragment": "2"
   },
@@ -58099,7 +58126,7 @@
     "plate": "-186",
     "fragment": "9",
     "edition": "DJD",
-    "volume": null,
+    "volume": "29",
     "ed_plate": "XXVII",
     "ed_fragment": "2"
   },
@@ -58541,7 +58568,7 @@
     "fragment": "1",
     "edition": "DJD",
     "volume": "23",
-    "ed_plate": "s.XVI-XX",
+    "ed_plate": "XVI-XX",
     "ed_fragment": null
   },
   {
@@ -59602,7 +59629,7 @@
     "plate": "-109",
     "fragment": "7",
     "edition": "DJD",
-    "volume": null,
+    "volume": "5",
     "ed_plate": " XXXI",
     "ed_fragment": "3"
   },
@@ -59611,7 +59638,7 @@
     "plate": "-109",
     "fragment": "8",
     "edition": "DJD",
-    "volume": null,
+    "volume": "5",
     "ed_plate": " XXXI",
     "ed_fragment": "3"
   },
@@ -59656,7 +59683,7 @@
     "plate": "-580",
     "fragment": "2",
     "edition": "DJD",
-    "volume": null,
+    "volume": "23",
     "ed_plate": "409",
     "ed_fragment": "43 (no photo)"
   },
@@ -59692,7 +59719,7 @@
     "plate": "-580",
     "fragment": "6",
     "edition": "DJD",
-    "volume": null,
+    "volume": "23",
     "ed_plate": "XLV",
     "ed_fragment": "21"
   },
@@ -59701,7 +59728,7 @@
     "plate": "-580",
     "fragment": "7",
     "edition": "DJD",
-    "volume": null,
+    "volume": "23",
     "ed_plate": "XLV",
     "ed_fragment": "23b"
   },
@@ -85214,6 +85241,15 @@
   {
     "manuscript": "11Q1",
     "plate": "-1039",
+    "fragment": "8",
+    "edition": "PHLS",
+    "volume": null,
+    "ed_plate": "1",
+    "ed_fragment": "A"
+  },
+  {
+    "manuscript": "11Q1",
+    "plate": "-1039",
     "fragment": "9",
     "edition": "RB",
     "volume": "96",
@@ -98626,7 +98662,7 @@
     "plate": "-134",
     "fragment": "7",
     "edition": "DJD",
-    "volume": null,
+    "volume": "13",
     "ed_plate": "VII",
     "ed_fragment": "17a+17b"
   },
@@ -98643,6 +98679,15 @@
     "manuscript": "4Q223",
     "plate": "-134",
     "fragment": "9",
+    "edition": "DJD",
+    "volume": "13",
+    "ed_plate": "VII",
+    "ed_fragment": "7c"
+  },
+  {
+    "manuscript": "4Q223",
+    "plate": "-134",
+    "fragment": "10",
     "edition": "DJD",
     "volume": "13",
     "ed_plate": "VII",
@@ -98680,7 +98725,7 @@
     "plate": "-134",
     "fragment": "14",
     "edition": "DJD",
-    "volume": null,
+    "volume": "13",
     "ed_plate": "VII",
     "ed_fragment": "7b"
   },
