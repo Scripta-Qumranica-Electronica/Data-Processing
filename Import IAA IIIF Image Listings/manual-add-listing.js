@@ -38,7 +38,7 @@ const createEntry = async (entry, side) => {
     return new Promise(async (resolve, reject) => {
         try {
             const edition = await pool.query(`
-            INSERT INTO edition_catalog (composition, edition_name, edition_volume, edition_location_1, edition_location_2, edition_side, scroll_id)
+            INSERT INTO edition_catalog (manuscript, edition_name, edition_volume, edition_location_1, edition_location_2, edition_side, scroll_id)
             VALUES('${entry.DJD_scroll}', '${edition_name}', '${entry.DJD_volume}', '${entry.DJD_plate}', '${entry.DJD_scroll_fragment}', ${side}, ${scroll_id})
             ON DUPLICATE KEY UPDATE edition_catalog_id = LAST_INSERT_ID(edition_catalog_id)
             `)

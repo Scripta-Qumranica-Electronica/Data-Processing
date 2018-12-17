@@ -52,9 +52,9 @@ def main(argv):
     processed = []
     lines = [line.rstrip('\n') for line in open(inputfile)]
     for line in tqdm(lines):
-        m = re.search(r'([X|\*]{0,1}\d{1,5})(\_\d|[a-zA-Z]{0,1}).*Fg(\d{1,5}).*-(R|V)-.*(LR445|LR924|ML445|ML924|_026|_028)', line)
+        m = re.search(r'([X|\*]{0,1}\d{1,5}.*)(-Fg|Fg)(\d{1,5}).*-(R|V)-.*(LR445|LR924|ML445|ML924|_026|_028)', line)
         if m is not None and len(m.groups(0)) == 5:
-            plate = str(m.group(1)) + m.group(2).replace('_', '/').replace('X', '*')
+            plate = str(m.group(1).replace('_', '/').replace('X', '*').replace('-', '/').rstrip('/'))
             fragment = str(m.group(3)).lstrip('0')
             side = '0'
             if ('R' in str(m.group(4))):
@@ -91,10 +91,11 @@ def main(argv):
                 """
             cursor.execute(sql, (plate, fragment, side))
             result_set = cursor.fetchall()
+            # print(plate, fragment, side, wvStart, wvEnd, type)
             if (len(result_set) == 1 and len(result_set[0]) == 2):
                 imageCatalogId = str(result_set[0][0])
                 editionCatalogId = str(result_set[0][1])
-                #print(plate, fragment, side, wvStart, wvEnd, type, imageCatalogId, editionCatalogId)
+                # print(plate, fragment, side, wvStart, wvEnd, type, imageCatalogId, editionCatalogId)
                 # exclude = ['1094','1095','1096','1097','1098','1099','1100','1101','1102','1103','1104','1106','1107','998']
                 # exclude = []
                 # if any(x not in plate for x in exclude): #TODO Probably should remove this check

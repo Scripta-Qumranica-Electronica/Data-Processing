@@ -2,6 +2,8 @@ const mariadb = require('mariadb')
 const pool = mariadb.createPool({host: 'localhost', port:3307, user:'root', password:'none', database: 'SQE_DEV', connectionLimit: 85})
 const axios = require('axios')
 
+// let batchUsed = 0
+// const batchSize = 20
 // We will count the completed rows because this is async
 let completed = 0
 // We will store the results in an array to write to file at the end
@@ -42,8 +44,10 @@ pool.getConnection()
       process.exit(1)
   })
 
-  const requestImage = (urls, count) => {
-    axios.get(`${urls[count].url}/full/150,/0/default.jpg`)
+  const requestImage = async (urls, count) => {
+    // batchUsed++
+    // if (batchUsed < batchSize) requestImage(urls, ++count)
+    axios.get(`${urls[count].url}/full/800,/0/default.jpg`)
     .then(res => {
         completed += 1
         printProgress((completed / urls.length) * 100, urls[count].url)
@@ -52,6 +56,8 @@ pool.getConnection()
             console.log(`Missed ${failed.length}`)
             process.exit(0)
         }
+        // batchUsed--
+        // if (batchUsed < batchSize) 
         requestImage(urls, ++count)
     })
     .catch(err => {
@@ -64,6 +70,7 @@ pool.getConnection()
             console.log(`Missed ${failed.length}`)
             process.exit(0)
         }
+        // if (batchUsed < batchSize) 
         requestImage(urls, ++count)
     })
 }
@@ -95,5 +102,5 @@ pool.getConnection()
 const printProgress = (progress, url) => {
   process.stdout.clearLine()
   process.stdout.cursorTo(0)
-  process.stdout.write(`${Math.round(progress * 100) / 100} % complete - ${url.replace('https://www.qumranica.org/image-proxy?address=', '')}`)
+  process.stdout.write(`${Math.round(progress * 100) / 100} % complete - ${url.replace('https://qumranica.org/image-proxy?address=', '')}`)
 }

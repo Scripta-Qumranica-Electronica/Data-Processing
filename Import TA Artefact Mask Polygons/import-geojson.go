@@ -113,7 +113,7 @@ func insertRecord(record string, dir string, filename string, wg * sync.WaitGrou
 	rows, err := db.Query(
 		`
 SELECT sqe_image_id, 
-	composition, 
+	manuscript, 
 	edition_location_1, 
 	edition_location_2, 
 	scroll_version_id,
