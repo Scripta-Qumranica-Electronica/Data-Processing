@@ -129,9 +129,9 @@ WHERE filename=?`,
 	checkErr(err, "n")
     defer rows.Close()
 	var sqeID int
-	var composition string
-	var loc_1 string
-	var loc_2 string
+	var composition sql.NullString
+	var loc_1 sql.NullString
+	var loc_2 sql.NullString
 	var scrollVerID int
     var artefactID sql.NullInt64
 	for rows.Next() {
@@ -176,7 +176,7 @@ WHERE filename=?`,
 	INSERT INTO artefact_data (artefact_id, name) 
 		VALUES (?, ?) 
 	ON DUPLICATE KEY UPDATE artefact_data_id=LAST_INSERT_ID(artefact_data_id)`,
-			artID, fmt.Sprintf("%s - %s - %s", composition, loc_1, loc_2))
+			artID, fmt.Sprintf("%s - %s - %s", composition.String, loc_1.String, loc_2.String))
 		checkErr(err, img)
 		var artDataID int64
 		artDataID, err = data.LastInsertId()

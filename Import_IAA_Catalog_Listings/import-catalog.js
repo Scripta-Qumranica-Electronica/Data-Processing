@@ -5,33 +5,47 @@ const pool = mariadb.createPool({
      port: 3307,
      user:'root', 
      password: 'none',
-     connectionLimit: 5,
+     connectionLimit: 75,
      database: "SQE_DEV"
 })
+const _cliProgress = require('cli-progress')
+const bar = new _cliProgress.Bar({}, _cliProgress.Presets.shades_classic)
+let prog = 0
 
 const importReferences = async () => {
+    console.log('Preparing to load entries.')
+    console.log('\tPlease be patient, it takes about 10 seconds to prepare for writing.')
+    bar.start(Object.keys(references).length, 0)
     for (const key in references) {
         for (const ref of references[key]) {
-            for (let i = 0; i <=1; i++) {
-                try {
-                    const imageCatNo = writeCatalog(ref, i)
-                    const editionNo = writeEdition(ref, i)
-                    await writeImgEd(await imageCatNo, await editionNo)
-                } catch(err) {
-                    console.error(err)
-                    process.exit(1)
-                }
-            }
-            
+            insertRef(ref)
         }
     }
-    try {
-        await pool.end()
-    } catch(err) {
-        console.error(err)
-        process.exit(1)
-    } finally {
-        process.exit(0)
+}
+
+const insertRef = async (ref) => {
+    for (let i = 0; i <=1; i++) {
+        try {
+            const imageCatNo = writeCatalog(ref, i)
+            const editionNo = writeEdition(ref, i)
+            await writeImgEd(await imageCatNo, await editionNo)
+        } catch(err) {
+            console.error(err)
+            process.exit(1)
+        }
+    }
+    bar.update(++prog)
+    if (Object.keys(references).length === prog) {
+        try {
+            await pool.end()
+        } catch(err) {
+            console.error(err)
+            process.exit(1)
+        } finally {
+            console.log('Successfully finished writing entries to the database.')
+            bar.stop()
+            process.exit(0)
+        }
     }
 }
 
@@ -53,7 +67,8 @@ const writeCatalog = (cat, side) => {
                 ])
             imageCatNo = res.insertId
         } catch (err) {
-            reject(err)
+            await sleep(5)
+            resolve(writeCatalog(cat, side))
         } finally {
             if (conn) {
                 conn.end()
@@ -85,7 +100,8 @@ const writeEdition = (edition, side) => {
                 ])
             editionNo = res.insertId
         } catch (err) {
-            reject(err)
+            await sleep(5)
+            resolve(writeEdition(edition, side))
         } finally {
             if (conn) {
                 conn.end()
@@ -109,13 +125,20 @@ const writeImgEd = (imageCatNo, editionNo) => {
                 ])
             imgEdNo = res.insertId
         } catch (err) {
-            reject(err)
+            await sleep(5)
+            resolve(writeImgEd(imageCatNo, editionNo))
         } finally {
             if (conn) {
                 conn.end()
                 resolve(imgEdNo)
             }
         }
+    })
+}
+
+const sleep = (ms) => {
+    return new Promise(resolve=>{
+        setTimeout(resolve,ms)
     })
 }
 

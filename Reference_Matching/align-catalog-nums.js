@@ -7,7 +7,7 @@
  * last run this parser made about 14,000 matches.
  * 
  * It outputs two other files: QWB_cols-discrete.json, and IAA-discrete.json.
- * These files ccan be used for debugging to see how well the parser was able
+ * These files can be used for debugging to see how well the parser was able
  * to break the joins and difficult names into discrete entities.
  */
 
@@ -263,7 +263,7 @@ getTextCols(p)
     }
 
     matches = multiDimensionalUnique(matches)
-    console.log(matches.length) 
+    console.log(chalk.green(`Found ${matches.length} possible matches.`)) 
     const csvString = toCSV([
       ['col_id', 'edition_catalog_id'],
       ...matches

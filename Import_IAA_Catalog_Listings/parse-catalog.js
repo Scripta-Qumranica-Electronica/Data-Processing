@@ -7,6 +7,7 @@
 const csv=require('csvtojson')
 const args = require('minimist')(process.argv.slice(2))
 const fs = require('fs').promises
+const manualRefs = require('./Data/manual-refs.json')
 
 const editions = require('./parsers.js').editions
 const expander = require('./reference-expansion.js').expander
@@ -48,72 +49,76 @@ const parseListingFile = async () => {
 }
 
 const parseListing = async (record) => {
-    const reference = record['DJD- publication number']
-    const csv = `${record['Manuscript number']}	${record['Plate number- IAA inventory']}	${record['Fragment number (on IAA plate)']}	${reference}`
-    writeQueue[csv] = []
     return new Promise((resolve, reject) => {
-        try {
-            let parsedReference
-            let parsedReferences = []
-            for (parser in editions) {
-                if (editions[parser].pat.test(reference)) {
-                    parsedReference = editions[parser].parse(reference)
+        const reference = record['DJD- publication number']
+        const csv = `${record['Manuscript number']}	${record['Plate number- IAA inventory']}	${record['Fragment number (on IAA plate)']}	${reference}`
+        if (manualRefs[csv]) writeQueue[csv] = manualRefs[csv]
+        else {
+            writeQueue[csv] = []
+            try {
+                let parsedReference
+                let parsedReferences = []
+                for (parser in editions) {
+                    if (editions[parser].pat.test(reference)) {
+                        parsedReference = editions[parser].parse(reference)
+                    }
                 }
-            }
-            if (!parsedReference) {
-                failed.push(record)
-                parsedReferences.push({
-                    edition: null, 
-                    volume: null, 
-                    ed_plate: null, 
-                    ed_fragment: null
-                })
-            } else {
-                parsedReferences = expander(parsedReference)
-            }
-            
-            parsedReferences.map(ref => {
-                let comment
-                if (ref.ed_fragment) {
-                    [ref.ed_fragment, comment] = ref.ed_fragment.split('(')
-                    ref.ed_fragment = ref.ed_fragment.trim().replace(/(;$)|(:$)|(\.$)|(,$)/g, "").trim()
-                    if (comment) comment = '(' + comment
-                    if (problemPattern.test(ref.ed_fragment) && !decimal.test(ref.ed_fragment)){
+                if (!parsedReference) {
+                    failed.push(record)
+                    parsedReferences.push({
+                        edition: null, 
+                        volume: null, 
+                        ed_plate: null, 
+                        ed_fragment: null
+                    })
+                } else {
+                    parsedReferences = expander(parsedReference)
+                }
+                
+                parsedReferences.map(ref => {
+                    let comment
+                    if (ref.ed_fragment) {
+                        [ref.ed_fragment, comment] = ref.ed_fragment.split('(')
+                        ref.ed_fragment = ref.ed_fragment.trim().replace(/(;$)|(:$)|(\.$)|(,$)/g, "").trim()
+                        if (comment) comment = '(' + comment
+                        if (problemPattern.test(ref.ed_fragment) && !decimal.test(ref.ed_fragment)){
+                            if (!problems[csv]) problems[csv] = []
+                            problems[csv].push({
+                                manuscript: record['Manuscript number'],
+                                plate: record['Plate number- IAA inventory'],
+                                fragment: record['Fragment number (on IAA plate)'],
+                                ...ref,
+                                comment: comment
+                            })
+                        }
+                    }
+
+                    if (problemPattern.test(ref.ed_plate)){
                         if (!problems[csv]) problems[csv] = []
                         problems[csv].push({
                             manuscript: record['Manuscript number'],
                             plate: record['Plate number- IAA inventory'],
                             fragment: record['Fragment number (on IAA plate)'],
-                            ...ref,
-                            comment: comment
+                            ...ref
                         })
                     }
-                }
-
-                if (problemPattern.test(ref.ed_plate)){
-                    if (!problems[csv]) problems[csv] = []
-                    problems[csv].push({
-                        manuscript: record['Manuscript number'],
-                        plate: record['Plate number- IAA inventory'],
+                    
+                    writeQueue[csv].push({
+                        manuscript: record['Manuscript number'].trim(),
+                        plate: record['Plate number- IAA inventory'].trim().replace(cleanPlate, '').trim(),
                         fragment: record['Fragment number (on IAA plate)'],
-                        ...ref
+                        ...ref,
+                        comment: comment
                     })
-                }
-                
-                writeQueue[csv].push({
-                    manuscript: record['Manuscript number'].trim(),
-                    plate: record['Plate number- IAA inventory'].trim().replace(cleanPlate, '').trim(),
-                    fragment: record['Fragment number (on IAA plate)'],
-                    ...ref,
-                    comment: comment
                 })
-            })
-            
-            resolve()
-        } catch(err) {
-            console.error(err)
-            reject()
+                
+                resolve()
+            } catch(err) {
+                console.error(err)
+                reject()
+            }
         }
+        
     })
 }
  
