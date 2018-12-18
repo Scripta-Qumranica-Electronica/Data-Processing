@@ -59,7 +59,7 @@ WHERE scroll_id IS NULL
 
 Now you can try out the matching of QWB and IAA references with `cd ../Reference_Matching` then `node align-catalog-nums.js`.  Remember that this does not add anything to the database, but rather gives a CSV file, `QWB_IAA-cols.csv`, with the col_id and corresponding edition_catalog_id, which can be imported into the database and used as a lookup table.
 
-## Text Text_Extraction
+## Text Extraction
 
 Several handy utilities for working with text from the SQE database can be found in the `Text_Extraction` folder.  See the `Readme.md` there.
 
