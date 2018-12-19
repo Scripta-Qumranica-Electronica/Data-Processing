@@ -38,8 +38,8 @@ const getImageCols = async pool => {
             if (!imageColumns[row.scroll_id].columns) imageColumns[row.scroll_id].columns = {}
             if (!imageColumns[row.scroll_id].columns[row.loc1]) imageColumns[row.scroll_id].columns[row.loc1] = []
             if (row.loc1) imageColumns[row.scroll_id].columns[row.loc1] = [...imageColumns[row.scroll_id].columns[row.loc1], row.ed_id]
-            if (!imageColumns[row.scroll_id].rows) imageColumns[row.scroll_id].rows = {}
-            if (row.loc2) imageColumns[row.scroll_id].rows[row.loc2] = imageColumns[row.scroll_id].rows[row.loc2] ? [...imageColumns[row.scroll_id].rows[row.loc2], row.ed_id] : [row.ed_id]
+            if (!imageColumns[row.scroll_id].frg) imageColumns[row.scroll_id].frg = {}
+            if (row.loc2) imageColumns[row.scroll_id].frg[row.loc2] = imageColumns[row.scroll_id].frg[row.loc2] ? [...imageColumns[row.scroll_id].frg[row.loc2], row.ed_id] : [row.ed_id]
         }
         fs.writeFile('IAA-discrete.json', JSON.stringify(imageColumns, null, 2), (err) => {  
             // throws an error, you could also catch it here
