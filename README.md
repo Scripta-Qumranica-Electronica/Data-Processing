@@ -57,7 +57,7 @@ WHERE scroll_id IS NULL
 
 6. Automatically position the scroll artefacts: `python3 set-artefact-positions.py`.
 
-Now you can try out the matching of QWB and IAA references with `cd ../Reference_Matching` then `node align-catalog-nums.js`.  Remember that this does not add anything to the database, but rather gives a CSV file, `QWB_IAA-cols.csv`, with the col_id and corresponding edition_catalog_id, which can be imported into the database and used as a lookup table.
+Now you can try out the matching of QWB and IAA references with `cd ../Reference_Matching` then `node parse-sqe-cols.js`, `node parse-iaa-refs.js`, and `node match-refs.js` (or just use `yarn parse` to run all three programs at once).  Remember that this does not add anything to the database, but rather gives a CSV file, `QWB_IAA-cols.csv`, with the col_id and corresponding edition_catalog_id, which can be imported into the database and used as a lookup table.
 
 ## Text Extraction
 

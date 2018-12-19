@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "parse": "node parse-sqe-cols.js && node parse-iaa-refs.js && node match-refs.js"  
+  },
   "dependencies": {
     "array-to-csv": "^1.0.1",
     "chalk": "^2.4.1",
