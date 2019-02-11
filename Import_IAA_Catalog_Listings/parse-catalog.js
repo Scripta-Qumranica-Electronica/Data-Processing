@@ -75,6 +75,8 @@ const parseListing = async (record) => {
                     parsedReferences = expander(parsedReference)
                 }
                 
+                // This is not yet dealing recursively with the edition plate entries
+                // Probably we should parse roman numerals here too.
                 parsedReferences.map(ref => {
                     let comment
                     if (ref.ed_fragment) {

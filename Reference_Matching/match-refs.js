@@ -18,13 +18,14 @@ const processMatches = () => {
                     for (frg of colName.frg) {
                         let tempMatch = []
                         if (iaa[scrollID].frg[frg]) tempMatch.push(...iaa[scrollID].frg[frg])
+                        //Match by scroll col doesn't appear to be working
                         if (tempMatch.length > 2 && colName.col && !isNaN(colName.col) && iaa[scrollID][toRoman(~~colName.col)]) {
                             tempMatch = tempMatch.filter(value => -1 !== iaa[scrollID][toRoman(~~colName.col)].indexOf(value))
                         }
                         if (tempMatch.length === 2) matches.push(...tempMatch.map(x => [x, ~~colName.col_id]))
                         else failed.push({scroll_id: scrollID, col_id: colName.col_id, col_name: colName[colName.col], frg: frg})
                     }
-                } else {
+                } else { //Match by scroll col doesn't appear to be working
                     if (!isNaN(colName.col) && iaa[scrollID][toRoman(~~colName.col)]) matches.push(...iaa[scrollID][toRoman(~~colName.col)].map(x => [x, ~~colName.col_id]))
                     else failed.push({scroll_id: scrollID, col_id: colName.col_id, col_name: colName[colName.col]})
                 }
