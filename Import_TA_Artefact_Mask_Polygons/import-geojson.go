@@ -82,7 +82,7 @@ func checkErr(err error, img string) {
 ** cases I ran up against.
  */
 func readFile(dir string, file string, wg * sync.WaitGroup) {
-	println("Starting: " + file)
+	//println("Starting: " + file)
 	poly, err := ioutil.ReadFile(dir + file)
 	checkErr(err, "n")
 	data := string(poly)
@@ -112,10 +112,10 @@ func insertRecord(record string, dir string, filename string, wg * sync.WaitGrou
 
 	rows, err := db.Query(
 		`
-SELECT sqe_image_id, 
-	manuscript, 
-	edition_location_1, 
-	edition_location_2, 
+SELECT sqe_image_id,
+	manuscript,
+	edition_location_1,
+	edition_location_2,
 	scroll_version_id,
     artefact_id
 FROM SQE_image
@@ -148,15 +148,15 @@ WHERE filename=?`,
         if (artID == 0) {
             data, err := tx.Exec(
 			`
-            INSERT INTO artefact () 
+            INSERT INTO artefact ()
             VALUES ()`)
             checkErr(err, img)
             artID, err = data.LastInsertId()
         }
-        
+
 		data, err := tx.Exec(
 			`
-	INSERT INTO artefact_shape (artefact_id, region_in_sqe_image, id_of_sqe_image) 
+	INSERT INTO artefact_shape (artefact_id, region_in_sqe_image, id_of_sqe_image)
 		VALUES (?, ST_GeomFromGeoJSON(?), ?)
     ON DUPLICATE KEY UPDATE artefact_shape_id=LAST_INSERT_ID(artefact_shape_id)`,
 			artID, record, sqeID)
@@ -166,15 +166,15 @@ WHERE filename=?`,
 
 		data, err = tx.Exec(
 			`
-	INSERT INTO artefact_shape_owner (artefact_shape_id, scroll_version_id) 
+	INSERT INTO artefact_shape_owner (artefact_shape_id, scroll_version_id)
 		VALUES (?, ?)`,
 			artShapeID, scrollVerID)
 		checkErr(err, img)
 
 		data, err = tx.Exec(
 			`
-	INSERT INTO artefact_data (artefact_id, name) 
-		VALUES (?, ?) 
+	INSERT INTO artefact_data (artefact_id, name)
+		VALUES (?, ?)
 	ON DUPLICATE KEY UPDATE artefact_data_id=LAST_INSERT_ID(artefact_data_id)`,
 			artID, fmt.Sprintf("%s - %s - %s", composition.String, loc_1.String, loc_2.String))
 		checkErr(err, img)
@@ -183,20 +183,20 @@ WHERE filename=?`,
 
 		data, err = tx.Exec(
 			`
-	INSERT INTO artefact_data_owner (artefact_data_id, scroll_version_id) 
+	INSERT INTO artefact_data_owner (artefact_data_id, scroll_version_id)
 		VALUES (?, ?)`,
 			artDataID, scrollVerID)
 		checkErr(err, img)
 
-		println("Done with: " + img)
-        
+		//println("Done with: " + img)
+
         err = tx.Commit()
         if err != nil {
             log.Fatal(err)
         }
 	} else {
 		failedFiles = append(failedFiles, img)
-		println("Failed with: " + img)
+		//println("Failed with: " + img)
 	}
     connsInUse -= 1
 }

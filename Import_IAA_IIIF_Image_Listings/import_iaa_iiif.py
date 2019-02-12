@@ -111,7 +111,7 @@ def main(argv):
             number_2 = None
             if line[0] == "M":
                 institution = "PAM"
-                pam = re.search(r'M(\d{2})(\d{1,5})-', line)
+                pam = re.search(r'[M|m](\d{2})(\d{1,5})-', line)
                 if pam is not None and len(pam.groups()) == 2:
                     number_1 = str(pam.group(1))
                     number_2 = str(pam.group(2))
