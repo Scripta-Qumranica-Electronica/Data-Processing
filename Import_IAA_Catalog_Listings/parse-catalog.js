@@ -12,7 +12,7 @@ const manualRefs = require('./Data/manual-refs.json')
 const editions = require('./parsers.js').editions
 const expander = require('./reference-expansion.js').expander
 
-const defaultFilePath = './Data/Fragment-on-plate-to-DJD-27042017-cleaned.tsv'
+const defaultFilePath = './Data/IAA-DJD-Fragment-Reference-10-02-2019.txt'
 let failed = []
 let problems = {}
 const problemPattern = /.*([\., +;:-]).*/
@@ -20,7 +20,7 @@ const decimal = /[\d]{1,3}\.[\d]{1,3}/
 const cleanPlate = /(^\-)|(^\()|(\)$)/g
 let writeQueue = {}
 if (!args.f) {
-    console.warn(`If you don't provide a filename with the -f switch, 
+    console.warn(`If you don't provide a filename with the -f switch,
     the default will be used: '${defaultFilePath}'.`)
 }
 const inputFile = args.f || defaultFilePath
@@ -56,27 +56,24 @@ const parseListing = async (record) => {
         else {
             writeQueue[csv] = []
             try {
-                let parsedReference
                 let parsedReferences = []
                 for (parser in editions) {
                     if (editions[parser].pat.test(reference)) {
-                        parsedReference = editions[parser].parse(reference)
+                        parsedReferences.push(editions[parser].parse(reference))
                     }
                 }
-                if (!parsedReference) {
+                if (parsedReferences.length === 0) {
                     failed.push(record)
                     parsedReferences.push({
-                        edition: null, 
-                        volume: null, 
-                        ed_plate: null, 
+                        edition: null,
+                        volume: null,
+                        ed_plate: null,
                         ed_fragment: null
                     })
                 } else {
-                    parsedReferences = expander(parsedReference)
+                    parsedReferences = expander(parsedReferences[0])
                 }
-                
-                // This is not yet dealing recursively with the edition plate entries
-                // Probably we should parse roman numerals here too.
+
                 parsedReferences.map(ref => {
                     let comment
                     if (ref.ed_fragment) {
@@ -104,7 +101,7 @@ const parseListing = async (record) => {
                             ...ref
                         })
                     }
-                    
+
                     writeQueue[csv].push({
                         manuscript: record['Manuscript number'].trim(),
                         plate: record['Plate number- IAA inventory'].trim().replace(cleanPlate, '').trim(),
@@ -113,15 +110,15 @@ const parseListing = async (record) => {
                         comment: comment
                     })
                 })
-                
+
                 resolve()
             } catch(err) {
                 console.error(err)
                 reject()
             }
         }
-        
+
     })
 }
- 
+
 parseListingFile()

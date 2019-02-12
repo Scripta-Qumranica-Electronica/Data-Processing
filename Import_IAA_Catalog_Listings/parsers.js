@@ -187,12 +187,16 @@ const parseMasada = (reference) => {
             
         const platePat = /.*pl\.(.*)/
         const plateMatch = platePat.exec(reference)
-        const plate = plateMatch ? plateMatch[1].split(':')[0] : /[A-z]* [A-z,]* (.*)/.exec(reference)[1]
+        const plate = plateMatch ? [...plateMatch[1].split('('), ...plateMatch[1].split(':')][0] : /[A-z]* [A-z,]* (.*)/.exec(reference)[1]
 
         let frag = null
         if (plateMatch && plateMatch[1].split(':')[1]) {
             const fragMatch = plateMatch[1].split(':')
             frag = fragMatch.slice(1,).join()
+        }
+        if (plateMatch && plateMatch[1].split('(')[1]) {
+            const fragMatch = plateMatch[1].split('(')
+            frag = '(' + fragMatch.slice(1,).join()
         }
 
         parsedReference = {edition: 'MAS', volume: vol, ed_plate: plate, ed_fragment: frag}

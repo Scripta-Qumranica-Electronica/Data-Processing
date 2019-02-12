@@ -1,6 +1,9 @@
 const editions = require('./parsers.js').editions
+const toArabic = require('roman-numerals').toArabic
+const toRoman = require('roman-numerals').toRoman
 
 const hasPlus = /\+/
+const hasDash = /\-/
 const hasAmp = /&/
 const hasComma = /,/
 const hasSemi = /\;/
@@ -13,9 +16,35 @@ const letterOnly = /^[A-z]{1,5}$/
 
 exports.expander = (record) => {
     let newRecords = []
-    if (record.ed_fragment && record.ed_fragment.indexOf(';') > -1){
-    }
-    if (hasSemi.test(record.ed_fragment)) {
+    if (hasPlus.test(record.ed_plate)) {
+        plates = record.ed_plate.split('+')
+        plates.map(ref => {
+            ref = ref.trim()
+            const newRef = {...record, ed_plate: ref}
+            newRefs = exports.expander(newRef)
+            newRecords.push(...newRefs)
+        })
+    } else if (hasDash.test(record.ed_plate)) {
+        plates = record.ed_plate.split('-')
+        try {
+            const start = toArabic(plates[0].trim())
+            const end = toArabic(plates[1].trim())
+            for (let i = start; i <= end; i++) {
+                const newRef = {...record, ed_plate: toRoman(i)}
+                newRefs = exports.expander(newRef)
+                newRecords.push(...newRefs)
+            }
+        } catch(err) {
+            console.error(record.ed_plate)
+            console.error(err)
+            plates.map(ref => {
+                ref = ref.trim()
+                const newRef = {...record, ed_plate: ref}
+                newRefs = exports.expander(newRef)
+                newRecords.push(...newRefs)
+            })
+        }
+    } else if (hasSemi.test(record.ed_fragment)) {
         const fragments = record.ed_fragment.split(';')
         let splits = 0
         fragments.map(ref => {

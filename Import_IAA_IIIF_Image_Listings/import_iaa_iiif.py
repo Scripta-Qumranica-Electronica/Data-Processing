@@ -54,7 +54,7 @@ def main(argv):
     for line in tqdm(lines):
         m = re.search(r'([X|\*]{0,1}\d{1,5}.*)(-Fg|Fg)(\d{1,5}).*-(R|V)-.*(LR445|LR924|ML445|ML924|_026|_028)', line)
         if m is not None and len(m.groups(0)) == 5:
-            plate = str(m.group(1).replace('_', '/').replace('X', '*').replace('-', '/').rstrip('/'))
+            plate = str(m.group(1).replace('Rec', '').replace('Vrs', '').replace('_', '/').replace('X', '*').replace('-', '/').rstrip('/'))
             fragment = str(m.group(3)).lstrip('0')
             side = '0'
             if ('R' in str(m.group(4))):
@@ -82,8 +82,7 @@ def main(argv):
                 wvStart = '924'
                 wvEnd = '924'
             sql = """
-                SELECT image_catalog_id, edition_catalog_id FROM image_catalog
-                JOIN image_to_edition_catalog USING(image_catalog_id)
+                SELECT image_catalog_id FROM image_catalog
                 WHERE institution = "IAA"
                 AND catalog_number_1 = %s
                 AND catalog_number_2 = %s
@@ -91,14 +90,8 @@ def main(argv):
                 """
             cursor.execute(sql, (plate, fragment, side))
             result_set = cursor.fetchall()
-            # print(plate, fragment, side, wvStart, wvEnd, type)
-            if (len(result_set) == 1 and len(result_set[0]) == 2):
+            if (len(result_set) == 1):
                 imageCatalogId = str(result_set[0][0])
-                editionCatalogId = str(result_set[0][1])
-                # print(plate, fragment, side, wvStart, wvEnd, type, imageCatalogId, editionCatalogId)
-                # exclude = ['1094','1095','1096','1097','1098','1099','1100','1101','1102','1103','1104','1106','1107','998']
-                # exclude = []
-                # if any(x not in plate for x in exclude): #TODO Probably should remove this check
                 sql = """
                     INSERT INTO SQE_image
                     (image_urls_id, filename, native_width, native_height,
@@ -111,9 +104,47 @@ def main(argv):
                 db.commit()
                 processed.append("%s %s" %(line, cursor.lastrowid,))
             else:
-                unprocessed.append(line)
+                unprocessed.append(line + " " + plate + " " + fragment)
         else:
-            unprocessed.append(line)
+            institution = ""
+            number_1 = ""
+            number_2 = None
+            if line[0] == "M":
+                institution = "PAM"
+                pam = re.search(r'M(\d{2})(\d{1,5})-', line)
+                if pam is not None and len(pam.groups()) == 2:
+                    number_1 = str(pam.group(1))
+                    number_2 = str(pam.group(2))
+            elif line[0] == "I":
+                institution = "I"
+                pam = re.search(r'I(\d{1,7})-', line)
+                if pam is not None and len(pam.groups()) == 1:
+                    number_1 = str(pam.group(1))
+                    number_2 = None
+            if institution is not "" and number_1 is not "":
+                sql = """
+                    INSERT INTO image_catalog (institution, catalog_number_1, catalog_number_2, catalog_side)
+                    VALUE (%s, %s, %s, 0)
+                    ON DUPLICATE KEY UPDATE image_catalog_id = LAST_INSERT_ID(image_catalog_id)
+                    """
+                cursor.execute(sql, (institution, number_1, number_2))
+                db.commit()
+                insert_id = cursor.lastrowid
+                sql = """
+                    INSERT INTO SQE_image
+                    (image_urls_id, filename, native_width, native_height,
+                        dpi, type, wavelength_start, wavelength_end, is_master,
+                        image_catalog_id)
+                    VALUES(2,%s,0,0,800,0,0,0,0,%s)
+                    ON DUPLICATE KEY UPDATE sqe_image_id=LAST_INSERT_ID(sqe_image_id);
+                    """
+                cursor.execute(sql,(line, insert_id))
+                db.commit()
+                processed.append("%s %s" %(line, cursor.lastrowid,))
+            else:
+                if number_2 is None:
+                    number_2 = ""
+                unprocessed.append(line + " " + institution + " " + number_1 + " " + number_2)
     cursor.close()
     db.close()
     with open('import_failed.txt', 'w') as f:
