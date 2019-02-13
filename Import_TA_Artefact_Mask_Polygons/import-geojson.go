@@ -14,6 +14,7 @@ import (
 	"strings"
     "sync"
     "time"
+    "gopkg.in/cheggaaa/pb.v1"
 
 	//"github.com/Bronson-Brown-deVost/gosqljson"
 	"fmt"
@@ -51,19 +52,21 @@ func main() {
 		log.Fatal(err)
 	}
 
+    bar := pb.StartNew(len(files))
 	for _, f := range files {
         wg.Add(1)
-		readFile(dir, f.Name(), &wg)
+		readFile(dir, f.Name(), &wg, bar)
 	}
 
     wg.Wait()
-	println("Finished inserting records.")
+    bar.FinishPrint("Finished inserting records.")
+	//println("Finished inserting records.")
 	if len(failedFiles) > 0 {
 		println("Some files failed.")
 		for _, v := range failedFiles {
 			println(fmt.Sprintf("%s", v))
 		}
-        println("%i files failed to load.", len(failedFiles))
+        println(len(failedFiles), " files failed to load.")
 	}
 
 	// insertRecord(record, filename)
@@ -81,7 +84,7 @@ func checkErr(err error, img string) {
 ** of fixes for malformed JSON.  The following catches all
 ** cases I ran up against.
  */
-func readFile(dir string, file string, wg * sync.WaitGroup) {
+func readFile(dir string, file string, wg * sync.WaitGroup, bar *pb.ProgressBar) {
 	//println("Starting: " + file)
 	poly, err := ioutil.ReadFile(dir + file)
 	checkErr(err, "n")
@@ -95,11 +98,11 @@ func readFile(dir string, file string, wg * sync.WaitGroup) {
 	checkErr(err, "n")
 	processed, err := json.Marshal(polygons)
 	checkErr(err, "n")
-	go insertRecord(string(processed[:]), dir, file, wg)
-	// fmt.Printf("%s\n", processed)
+	go insertRecord(string(processed[:]), dir, file, wg, bar)
+	//fmt.Printf("%s\n", processed)
 }
 
-func insertRecord(record string, dir string, filename string, wg * sync.WaitGroup) {
+func insertRecord(record string, dir string, filename string, wg * sync.WaitGroup, bar *pb.ProgressBar) {
     defer wg.Done()
     for connsInUse >= maxConns {
         time.Sleep(100 * time.Millisecond)
@@ -189,6 +192,7 @@ WHERE filename=?`,
 		checkErr(err, img)
 
 		//println("Done with: " + img)
+        bar.Increment()
 
         err = tx.Commit()
         if err != nil {
@@ -197,6 +201,7 @@ WHERE filename=?`,
 	} else {
 		failedFiles = append(failedFiles, img)
 		//println("Failed with: " + img)
+        bar.Increment()
 	}
     connsInUse -= 1
 }

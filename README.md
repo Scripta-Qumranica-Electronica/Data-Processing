@@ -34,6 +34,7 @@ The python programs here use python3.  You will need to install (with pip3?) the
 Yes, for some unknown reason we also use GO.  You should `go get` the following package(s):
 
 * github.com/go-sql-driver/mysql
+* gopkg.in/cheggaaa/pb.v1
 
 ## Loading Image Data
 
@@ -47,7 +48,7 @@ Many of the scripts here are used for importing image data into the SQE database
 
 4. You probably should check the database now to make sure all refs are linked to a scroll_id:
 ```sql
-SELECT DISTINCT	* 
+SELECT DISTINCT	*
 FROM edition_catalog
 WHERE scroll_id IS NULL
 ```

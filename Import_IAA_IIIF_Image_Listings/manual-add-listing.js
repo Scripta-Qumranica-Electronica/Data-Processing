@@ -22,15 +22,15 @@ const processFile = async () => {
             const sideR = await createEntry(entry, 0)
             if (sideR.warningStatus !== 0) throw(new Error(JSON.stringify(entry)))
             const sideV = await createEntry(entry, 1)
-            if (sideR.warningStatus !== 0) throw(new Error(JSON.stringify(entry)))
-        } 
-        
+            if (sideV.warningStatus !== 0) throw(new Error(JSON.stringify(entry)))
+        }
+
         console.log('Finished adding images with edition data.')
         process.exit(0)
     } catch(err) {
         console.error('Process failed.')
         console.error(err)
-        process,exit(1)
+        process.exit(1)
     }
 }
 
@@ -42,11 +42,11 @@ const createEntry = async (entry, side) => {
             VALUES('${entry.DJD_scroll}', '${edition_name}', '${entry.DJD_volume}', '${entry.DJD_plate}', '${entry.DJD_scroll_fragment}', ${side}, ${scroll_id})
             ON DUPLICATE KEY UPDATE edition_catalog_id = LAST_INSERT_ID(edition_catalog_id)
             `)
-            
+
             const image = await pool.query(`
             INSERT INTO image_catalog (institution, catalog_number_1, catalog_number_2, catalog_side)
             VALUES('${institution}', ${entry.IAA_plate}, ${entry.IAA_fragment}, ${side})
-            ON DUPLICATE KEY UPDATE image_catalog_id = LAST_INSERT_ID(image_catalog_id) 
+            ON DUPLICATE KEY UPDATE image_catalog_id = LAST_INSERT_ID(image_catalog_id)
             `)
 
             const binding = await pool.query(`
@@ -57,7 +57,7 @@ const createEntry = async (entry, side) => {
             resolve(binding)
         } catch(err) {
             reject(err)
-        }     
+        }
     })
 }
 
