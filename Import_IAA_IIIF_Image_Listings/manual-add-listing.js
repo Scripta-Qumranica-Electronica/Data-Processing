@@ -50,7 +50,7 @@ const createEntry = async (entry, side) => {
             `)
 
             const binding = await pool.query(`
-            INSERT INTO image_to_edition_catalog (edition_catalog_id, image_catalog_id)
+            INSERT IGNORE INTO image_to_edition_catalog (edition_catalog_id, image_catalog_id)
             VALUES(${edition.insertId}, ${image.insertId})
             `)
 

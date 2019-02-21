@@ -2,11 +2,9 @@ const mariadb = require('mariadb')
 const pool = mariadb.createPool({host: 'localhost', port:3307, user:'root', password:'none', database: 'SQE_DEV', connectionLimit: 85})
 const axios = require('axios')
 const fs = require('fs')
-const argv = require('minimist')(process.argv.slice(2))
+const readline = require('readline')
 const log = require('single-line-log')(process.stdout)
 const clui = require('clui')
-
-const size = argv.s || '150,'
 
 const Progress = clui.Progress
 const thisProgressBar = new Progress(20)
@@ -27,7 +25,8 @@ pool.getConnection()
     SELECT CONCAT(image_urls.proxy, image_urls.url, SQE_image.filename) AS url
     FROM SQE_image 
     JOIN image_urls USING(image_urls_id)
-    WHERE image_urls_id != 0
+    WHERE image_urls_id != 0 AND SQE_image.type = 0
+    ORDER BY SQE_image.sqe_image_id
     `)
       .then((rows) => {
         results = new Array(rows.length)  // Now we know how many results to expect, so instantiate the results Array
@@ -57,7 +56,7 @@ pool.getConnection()
   const requestImage = async (urls, count, retries, start) => {
     // batchUsed++
     // if (batchUsed < batchSize) requestImage(urls, ++count)
-    axios.get(`${urls[count].url}/full/${size}/0/default.jpg`)
+    axios.get(`${urls[count].url}/full/150,/0/default.jpg`)
     .then(res => {
         completed += 1
         avgTime.push(Date.now() - start)
