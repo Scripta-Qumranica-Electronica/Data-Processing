@@ -99,7 +99,7 @@ END LOOP;
 CLOSE cur;
 END;`,
 `call update_comps();`,
-`DROP PROCEDURE IF EXISTS update_comps;`
+`DROP PROCEDURE IF EXISTS update_comps;`,
 ]
 
 const processLinks = async () => {

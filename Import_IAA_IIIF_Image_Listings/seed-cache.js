@@ -5,9 +5,11 @@ const fs = require('fs')
 const readline = require('readline')
 const log = require('single-line-log')(process.stdout)
 const clui = require('clui')
+const argv = require('minimist')(process.argv.slice(2))
 
 const Progress = clui.Progress
 const thisProgressBar = new Progress(20)
+const size = argv.s || '150,'
 
 // let batchUsed = 0
 // const batchSize = 20
@@ -56,7 +58,7 @@ pool.getConnection()
   const requestImage = async (urls, count, retries, start) => {
     // batchUsed++
     // if (batchUsed < batchSize) requestImage(urls, ++count)
-    axios.get(`${urls[count].url}/full/150,/0/default.jpg`)
+    axios.get(`${urls[count].url}/full/${size}/0/default.jpg`)
     .then(res => {
         completed += 1
         avgTime.push(Date.now() - start)
