@@ -116,7 +116,7 @@ def main(argv):
                     number_1 = str(pam.group(1))
                     number_2 = str(pam.group(2))
             elif line[0] == "I":
-                institution = "I"
+                institution = "IDAM/IAA"
                 pam = re.search(r'I(\d{1,7})-', line)
                 if pam is not None and len(pam.groups()) == 1:
                     number_1 = str(pam.group(1))
