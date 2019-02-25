@@ -37,6 +37,15 @@
       "volume": "29",
       "ed_plate": "XXVII",
       "ed_fragment": "1"
+    },
+    {
+      "manuscript": "4Q1",
+      "plate": "391",
+      "fragment": "10",
+      "edition": "DJD",
+      "volume": "12",
+      "ed_plate": "III",
+      "ed_fragment": "24"
     }
   ]
 }

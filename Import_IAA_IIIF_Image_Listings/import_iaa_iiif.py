@@ -109,16 +109,22 @@ def main(argv):
             institution = ""
             number_1 = ""
             number_2 = None
-            if line[0] == "M":
+            if line[0] == "M" or line[0] == "m":
                 institution = "PAM"
                 pam = re.search(r'[M|m](\d{2})(\d{1,5})-', line)
                 if pam is not None and len(pam.groups()) == 2:
                     number_1 = str(pam.group(1))
                     number_2 = str(pam.group(2))
             elif line[0] == "I":
-                institution = "IDAM/IAA"
+                institution = "IDAM-IAA"
                 pam = re.search(r'I(\d{1,7})-', line)
                 if pam is not None and len(pam.groups()) == 1:
+                    number_1 = str(pam.group(1))
+                    number_2 = None
+            elif line[0] == "P":
+                institution = "IAA"
+                pam = re.search(r'P(\d{1,7}.*?\d{1,2})(-F|_n|F)', line)
+                if pam is not None and len(pam.groups()) > 0:
                     number_1 = str(pam.group(1))
                     number_2 = None
             if institution is not "" and number_1 is not "":

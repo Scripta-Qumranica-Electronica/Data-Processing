@@ -5,11 +5,9 @@ const fs = require('fs')
 const readline = require('readline')
 const log = require('single-line-log')(process.stdout)
 const clui = require('clui')
-const argv = require('minimist')(process.argv.slice(2))
 
 const Progress = clui.Progress
 const thisProgressBar = new Progress(20)
-const size = argv.s || '150,'
 
 // let batchUsed = 0
 // const batchSize = 20
@@ -27,7 +25,7 @@ pool.getConnection()
     SELECT CONCAT(image_urls.proxy, image_urls.url, SQE_image.filename) AS url
     FROM SQE_image 
     JOIN image_urls USING(image_urls_id)
-    WHERE image_urls_id != 0 AND SQE_image.type = 0
+    WHERE image_urls_id != 0
     ORDER BY SQE_image.sqe_image_id
     `)
       .then((rows) => {
@@ -56,13 +54,12 @@ pool.getConnection()
   })
 
   const requestImage = async (urls, count, retries, start) => {
-    // batchUsed++
-    // if (batchUsed < batchSize) requestImage(urls, ++count)
-    axios.get(`${urls[count].url}/full/${size}/0/default.jpg`)
-    .then(res => {
+    try {
+        res = await axios.get(`${urls[count].url}/info.json`)
+        await getSizedImage(urls[count].url, res.data.sizes, 0)
         completed += 1
         avgTime.push(Date.now() - start)
-        printProgress((completed / urls.length) * 100, urls[count].url, urls.length, completed)
+        printProgress((completed / urls.length) * 100, `${urls[count].url}/full/${res.data.sizes[0].width},/0/default.jpg`, urls.length, completed)
         if (completed === urls.length) {
             if (failed.length > 0) {
                 const file = fs.createWriteStream('seed-failed.txt')
@@ -76,8 +73,8 @@ pool.getConnection()
         // batchUsed--
         // if (batchUsed < batchSize) 
         requestImage(urls, ++count, 0, Date.now())
-    })
-    .catch(err => {
+    } catch(err) {
+        console.error(err)
         if (retries <= 20) {
             requestImage(urls, count, ++retries, start) // Try 20 times to get file
         } else { // Give up and move on
@@ -85,7 +82,7 @@ pool.getConnection()
             //console.error(err)
             completed += 1
             avgTime.push(Date.now() - start)
-            printProgress((completed / urls.length) * 100, urls[count].url, urls.length, completed)
+            printProgress((completed / urls.length) * 100, 'Failed! ' + urls[count].url, urls.length, completed)
             if (completed === urls.length) {
                 if (failed.length > 0) {
                     const file = fs.createWriteStream('seed-failed.txt')
@@ -99,7 +96,24 @@ pool.getConnection()
             // if (batchUsed < batchSize) 
             requestImage(urls, ++count, 0, Date.now())
         }
-    })
+    }
+}
+
+const getSizedImage = async (url, sizes, count) => {
+    if (count < 20) {
+        try {
+            const images = await Promise.all([
+                axios.get(`${url}/full/${sizes[0].width},/0/default.jpg`),
+                axios.get(`${url}/full/${sizes[1].width},/0/default.jpg`),
+                axios.get(`${url}/full/${sizes[2].width},/0/default.jpg`),
+                axios.get(`${url}/full/${sizes[3].width},/0/default.jpg`)
+            ])
+        } catch(err) {
+            getSizedImage(url, sizes, ++count)
+        }
+    } else {
+        throw `Failed ${url}/full/${sizes[0].width},/0/default.jpg`
+    }
 }
 
 // const requestImage = (url, count, length) => {
