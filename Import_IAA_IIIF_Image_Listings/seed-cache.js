@@ -23,7 +23,7 @@ pool.getConnection()
     // default SQE data.
     conn.query(`
     SELECT CONCAT(image_urls.proxy, image_urls.url, SQE_image.filename) AS url
-    FROM SQE_image 
+    FROM SQE_image
     JOIN image_urls USING(image_urls_id)
     WHERE image_urls_id != 0
     ORDER BY SQE_image.sqe_image_id
@@ -34,7 +34,7 @@ pool.getConnection()
         // Get the text for each line (processLine launches an async database query)
         // for (let i = 0, row; (row = rows[i]); i++) {
         //   requestImage(row.url, i, rows.length - 1)
-          
+
         //   // processLineWords(row, i, rows.length - 1)
         // }
         requestImage(rows, 0, 0, Date.now())
@@ -46,7 +46,7 @@ pool.getConnection()
         conn.end()
         process.exit(1)
       })
-      
+
   }).catch(err => {
     //not connected
       console.error(err)
@@ -71,13 +71,13 @@ pool.getConnection()
             process.exit(0)
         }
         // batchUsed--
-        // if (batchUsed < batchSize) 
+        // if (batchUsed < batchSize)
         requestImage(urls, ++count, 0, Date.now())
     } catch(err) {
-        console.error(err)
         if (retries <= 20) {
             requestImage(urls, count, ++retries, start) // Try 20 times to get file
         } else { // Give up and move on
+            console.error(err)
             failed.push(urls[count].url)
             //console.error(err)
             completed += 1
@@ -93,7 +93,7 @@ pool.getConnection()
                 }
                 process.exit(0)
             }
-            // if (batchUsed < batchSize) 
+            // if (batchUsed < batchSize)
             requestImage(urls, ++count, 0, Date.now())
         }
     }
@@ -102,7 +102,7 @@ pool.getConnection()
 const getSizedImage = async (url, sizes, count) => {
     if (count < 20) {
         try {
-            const images = await Promise.all([
+            await Promise.all([
                 axios.get(`${url}/full/${sizes[0].width},/0/default.jpg`),
                 axios.get(`${url}/full/${sizes[1].width},/0/default.jpg`),
                 axios.get(`${url}/full/${sizes[2].width},/0/default.jpg`),

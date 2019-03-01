@@ -3,13 +3,11 @@
 # This reads in in a simple .txt file containing a list of filenames.
 # The IAA's iiif server code address is hardcoded on line 90.
 # We grab the info.json file for the image and get width and height.
-# Actually, I am not now grabbing the image data from info.json
-# because the NLI iiif server is too slow and the images all seem
-# to be 7216x5412.
 # Then we parse the filename, look up the plate and fragment in the DB.
 # Finally we write a new SQE_image entry from the filename.
 import sys, getopt
-import urllib.request, json
+import json
+import requests
 import mysql.connector
 import re
 from tqdm import tqdm
@@ -52,6 +50,10 @@ def main(argv):
     processed = []
     lines = [line.rstrip('\n') for line in open(inputfile)]
     for line in tqdm(lines):
+        req = requests.get('https://www.qumranica.org/image-proxy?address=http://192.114.7.208:8182/iiif/2/' + line + '/info.json')
+        resp = req.json()
+        height = resp["height"]
+        width = resp["width"]
         m = re.search(r'([X|\*]{0,1}\d{1,5}.*)(-Fg|Fg)(\d{1,5}).*-(R|V)-.*(LR445|LR924|ML445|ML924|_026|_028)', line)
         if m is not None and len(m.groups(0)) == 5:
             plate = str(m.group(1).replace('Rec', '').replace('Vrs', '').replace('_', '/').replace('X', '*').replace('-', '/').rstrip('/'))
@@ -63,21 +65,21 @@ def main(argv):
                 side = '1'
             wvStart = '0'
             wvEnd = '0'
-            type = '1'
+            imgType = '1'
             master = '0'
             if ('445' in str(m.group(5))):
                 wvStart = '445'
                 wvEnd = '704'
-                type = '0'
+                imgType = '0'
                 master = '1'
             elif ('26' in str(m.group(5))):
                 wvStart = '924'
                 wvEnd = '924'
-                type = '2'
+                imgType = '2'
             elif ('28' in str(m.group(5))):
                 wvStart = '924'
                 wvEnd = '924'
-                type = '3'
+                imgType = '3'
             elif ('924' in str(m.group(5))):
                 wvStart = '924'
                 wvEnd = '924'
@@ -97,10 +99,10 @@ def main(argv):
                     (image_urls_id, filename, native_width, native_height,
                         dpi, type, wavelength_start, wavelength_end, is_master,
                         image_catalog_id)
-                    VALUES(2,%s,7216,5412,1215,%s,%s,%s,%s,%s)
+                    VALUES(2,%s,%s,%s,1215,%s,%s,%s,%s,%s)
                     ON DUPLICATE KEY UPDATE sqe_image_id=LAST_INSERT_ID(sqe_image_id);
                     """
-                cursor.execute(sql,(line, type, wvStart, wvEnd, master, imageCatalogId))
+                cursor.execute(sql,(line, width, height, imgType, wvStart, wvEnd, master, imageCatalogId))
                 db.commit()
                 processed.append("%s %s" %(line, cursor.lastrowid,))
             else:
@@ -141,10 +143,10 @@ def main(argv):
                     (image_urls_id, filename, native_width, native_height,
                         dpi, type, wavelength_start, wavelength_end, is_master,
                         image_catalog_id)
-                    VALUES(2,%s,0,0,800,0,0,0,0,%s)
+                    VALUES(2,%s,%s,%s,800,0,0,0,0,%s)
                     ON DUPLICATE KEY UPDATE sqe_image_id=LAST_INSERT_ID(sqe_image_id);
                     """
-                cursor.execute(sql,(line, insert_id))
+                cursor.execute(sql,(line, width, height, insert_id))
                 db.commit()
                 processed.append("%s %s" %(line, cursor.lastrowid,))
             else:
