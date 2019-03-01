@@ -27,12 +27,17 @@ const parseListingFile = async () => {
         const listings = await csv({delimiter: 'auto'}).fromFile(inputFile)
         console.log(`Processing ${listings.length} entries.`)
 
-        // for (let i = 0; i < listings.length; i++) {
-        //     await savePair(listings[i])
-        // }
-        // tasks = []
         await Promise.all(listings.map(async listing => await savePair(listing)))
-        // tasks.map(async task => {try{await task} catch(err) {throw err}})
+
+        const scroll = await pool.query(`
+    INSERT INTO edition_catalog_owner (edition_catalog_id, scroll_version_id)
+    SELECT DISTINCT edition_catalog_id, scroll_version_id
+    FROM edition_catalog
+    JOIN scroll_data USING(scroll_id)
+    JOIN scroll_data_owner USING(scroll_data_id)
+    JOIN scroll_version USING(scroll_version_id)
+    WHERE scroll_version.user_id = 1`)
+    
         console.log(`Processed ${count} entries.`)
         process.exit(0)
     } catch(err) {
