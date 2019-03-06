@@ -12,10 +12,7 @@ data = {
 
 r = requests.post("https://www.qumranica.org/Scrollery/resources/cgi-bin/scrollery-cgi.pl", json=data, headers=headers)
 
-
-# print(r.status_code, r.reason)
-# print (r.text)
-print "Parsing data."
+print("Parsing data.")
 json_data = json.loads(r.text)
 column = json_data[u'text'][0][u'fragments'][0]
 parsed_string = ''
@@ -32,12 +29,12 @@ for line in column[u'lines']:
     sign[u'chars'][u'attributes'][u'values'][u'attribute_value'] == u'SPACE'):
       parsed_string += ' '
       current_line.append(u' ')
-      if (u'attributes' not in sign[u'chars'] or u'attribute_name' not in sign[u'chars'][u'attributes'] or 
+      if (u'attributes' not in sign[u'chars'] or u'attribute_name' not in sign[u'chars'][u'attributes'] or
       u'is_reconstructed' not in sign[u'chars'][u'attributes'][u'attribute_name']):
         parsed_string_no_reconstructed += ' '
         current_line_no_reconstructed.append(" ")
     elif (u'sign_char' in sign[u'chars'] and sign[u'chars'][u'sign_char'] != u''):
-      if (u'attributes' not in sign[u'chars'] or u'attribute_name' not in sign[u'chars'][u'attributes'] or 
+      if (u'attributes' not in sign[u'chars'] or u'attribute_name' not in sign[u'chars'][u'attributes'] or
       u'is_reconstructed' not in sign[u'chars'][u'attributes'][u'attribute_name']):
         parsed_string_no_reconstructed += sign[u'chars'][u'sign_char']
         current_line_no_reconstructed.append(sign[u'chars'][u'sign_char'])
@@ -48,11 +45,11 @@ for line in column[u'lines']:
   parsed_chars.append({line[u'line_name']: current_line})
   parsed_chars_no_reconstructed.append({line[u'line_name']: current_line_no_reconstructed})
   count += 1
-print "Parsed string.\n"
-print parsed_string
-print "Dictionary of chars organized by line.\n"
-print parsed_chars
-print "Parsed string with no reconstructed text.\n"
-print parsed_string_no_reconstructed
-print "Dictionary of chars organized by line. No reconstructed text\n"
-print parsed_chars_no_reconstructed
+print("Parsed string.\n")
+print(parsed_string)
+print("Dictionary of chars organized by line.\n")
+print(parsed_chars)
+print("Parsed string with no reconstructed text.\n")
+print(parsed_string_no_reconstructed)
+print("Dictionary of chars organized by line. No reconstructed text\n")
+print(parsed_chars_no_reconstructed)
