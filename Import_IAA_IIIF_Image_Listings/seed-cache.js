@@ -116,39 +116,12 @@ const getSizedImage = async (url, sizes, count) => {
     }
 }
 
-// const requestImage = (url, count, length) => {
-//     axios.get(`${url}/full/150,/0/default.jpg`)
-//     .then(res => {
-//         completed += 1
-//         printProgress((completed / length) * 100, url)
-//         if (completed === length) {
-//             console.log(failed)
-//             console.log(`Missed ${failed.length}`)
-//             process.exit(0)
-//         }
-//     })
-//     .catch(err => {
-//         failed.push(url)
-//         //console.error(err)
-//         completed += 1
-//         printProgress((completed / length) * 100)
-//         if (completed === length) {
-//             console.log(failed)
-//             console.log(`Missed ${failed.length}`)
-//             process.exit(0)
-//         }
-//     })
-// }
-
 const printProgress = (progress, url, imagesTotal, imagesCompleted) => {
-  //readline.cursorTo(process.stdout, 0, 0)
-  //readline.clearScreenDown(process.stdout)
   const imagesLeft = imagesTotal - imagesCompleted
   const averageTime = (avgTime.reduce((a, b) => a + b, 0) / avgTime.length) / 1000 // Average time in seconds
   const timeLeft = (averageTime * imagesLeft) / 3600 // Time left in hours
   log.clear()
   log(`${thisProgressBar.update(imagesCompleted, imagesTotal)} ${truncateDecimals(timeLeft, 1)} hours left for ${imagesLeft} imgs (avg ${truncateDecimals(averageTime, 1)} secs) - ${url.replace('https://qumranica.org/image-proxy?address=', '')}`)
-  //process.stdout.write(`${thisProgressBar.update(imagesCompleted, imagesTotal)} ${truncateDecimals(timeLeft, 1)} hours left for ${imagesLeft} imgs (avg ${truncateDecimals(averageTime, 1)} secs) - ${url.replace('https://qumranica.org/image-proxy?address=', '')}`)
 }
 
 function truncateDecimals (num, digits) {

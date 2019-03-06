@@ -3,10 +3,6 @@ const args = require('minimist')(process.argv.slice(2))
 const mariadb = require('mariadb')
 const pool = mariadb.createPool({host: 'localhost', port:3307, user:'root', password:'none', database: 'SQE_DEV', connectionLimit: 10})
 
-const edition_name = 'DJD'
-const scroll_id = 219
-const institution = 'IAA'
-
 if (!args.f) {
     console.error('You must supply the path to a CSV file with the -f switch.')
     process.exit(1)
@@ -39,13 +35,13 @@ const createEntry = async (entry, side) => {
         try {
             const edition = await pool.query(`
             INSERT INTO edition_catalog (manuscript, edition_name, edition_volume, edition_location_1, edition_location_2, edition_side, scroll_id)
-            VALUES('${entry.DJD_scroll}', '${edition_name}', '${entry.DJD_volume}', '${entry.DJD_plate}', '${entry.DJD_scroll_fragment}', ${side}, ${scroll_id})
+            VALUES('${entry.DJD_scroll}', '${entry.edition_name}', '${entry.DJD_volume}', '${entry.DJD_plate}', '${entry.DJD_scroll_fragment}', ${side}, ${entry.scroll_id})
             ON DUPLICATE KEY UPDATE edition_catalog_id = LAST_INSERT_ID(edition_catalog_id)
             `)
 
             const image = await pool.query(`
             INSERT INTO image_catalog (institution, catalog_number_1, catalog_number_2, catalog_side)
-            VALUES('${institution}', ${entry.IAA_plate}, ${entry.IAA_fragment}, ${side})
+            VALUES('${entry.institution}', ${entry.IAA_plate}, ${entry.IAA_fragment}, ${side})
             ON DUPLICATE KEY UPDATE image_catalog_id = LAST_INSERT_ID(image_catalog_id)
             `)
 
