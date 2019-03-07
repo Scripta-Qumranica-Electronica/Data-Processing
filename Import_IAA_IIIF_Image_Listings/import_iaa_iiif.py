@@ -97,13 +97,13 @@ def main(argv):
                     imageCatalogId = str(result_set[0][0])
                     sql = """
                         INSERT INTO SQE_image
-                        (image_urls_id, filename, native_width, native_height,
+                        (image_urls_id, filename,
                             dpi, type, wavelength_start, wavelength_end, is_master,
-                            image_catalog_id)
-                        VALUES(2,%s,%s,%s,1215,%s,%s,%s,%s,%s)
+                            image_catalog_id, native_width, native_height)
+                        VALUES(2,%s,1215,%s,%s,%s,%s,%s,%s,%s)
                         ON DUPLICATE KEY UPDATE sqe_image_id=LAST_INSERT_ID(sqe_image_id);
                         """
-                    cursor.execute(sql,(line, width, height, imgType, wvStart, wvEnd, master, imageCatalogId))
+                    cursor.execute(sql,(line, imgType, wvStart, wvEnd, master, imageCatalogId, width, height))
                     db.commit()
                     processed.append("%s %s" %(line, cursor.lastrowid,))
                 else:
@@ -141,13 +141,13 @@ def main(argv):
                     insert_id = cursor.lastrowid
                     sql = """
                         INSERT INTO SQE_image
-                        (image_urls_id, filename, native_width, native_height,
+                        (image_urls_id, filename,
                             dpi, type, wavelength_start, wavelength_end, is_master,
-                            image_catalog_id)
-                        VALUES(2,%s,%s,%s,800,0,0,0,0,%s)
+                            image_catalog_id, native_width, native_height)
+                        VALUES(2,%s,800,0,0,0,0,%s,%s,%s)
                         ON DUPLICATE KEY UPDATE sqe_image_id=LAST_INSERT_ID(sqe_image_id);
                         """
-                    cursor.execute(sql,(line, width, height, insert_id))
+                    cursor.execute(sql,(line, insert_id, width, height))
                     db.commit()
                     processed.append("%s %s" %(line, cursor.lastrowid,))
                 else:

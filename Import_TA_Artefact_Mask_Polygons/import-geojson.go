@@ -111,10 +111,8 @@ func insertRecord(record string, dir string, filename string, wg * sync.WaitGrou
 	//img := strings.Split(filename, "/")[4]
 	img := strings.Split(filename, "json")[0]
 	img = strings.Replace(img, " ", "", -1)
-	img = img + "tif"
 
-	rows, err := db.Query(
-		`
+	rows, err := db.Query(`
 SELECT sqe_image_id,
 	manuscript,
 	edition_location_1,
@@ -122,13 +120,12 @@ SELECT sqe_image_id,
 	scroll_version_id,
     artefact_id
 FROM SQE_image
-    JOIN image_to_edition_catalog USING(image_catalog_id)
-	JOIN edition_catalog USING(edition_catalog_id)
-	JOIN scroll_version_group USING(scroll_id)
-	JOIN scroll_version USING(scroll_version_group_id)
+    LEFT JOIN image_to_edition_catalog USING(image_catalog_id)
+	LEFT JOIN edition_catalog USING(edition_catalog_id)
+	LEFT JOIN scroll_version_group USING(scroll_id)
+	LEFT JOIN scroll_version USING(scroll_version_group_id)
     LEFT JOIN artefact_shape ON artefact_shape.id_of_sqe_image = SQE_image.sqe_image_id
-WHERE filename=?`,
-		img)
+WHERE filename LIKE "` + img + `%"`)
 	checkErr(err, "n")
     defer rows.Close()
 	var sqeID int
