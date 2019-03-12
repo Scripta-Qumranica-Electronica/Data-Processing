@@ -132,7 +132,7 @@ WHERE filename LIKE "` + img + `%"`)
 	var composition sql.NullString
 	var loc_1 sql.NullString
 	var loc_2 sql.NullString
-	var scrollVerID int
+	var scrollVerID sql.NullInt64
     var artefactID sql.NullInt64
 	for rows.Next() {
 		err = rows.Scan(&sqeID, &composition, &loc_1, &loc_2, &scrollVerID, &artefactID)
@@ -166,7 +166,7 @@ WHERE filename LIKE "` + img + `%"`)
 
 		data, err = tx.Exec(
 			`
-	INSERT INTO artefact_shape_owner (artefact_shape_id, scroll_version_id)
+	INSERT IGNORE INTO artefact_shape_owner (artefact_shape_id, scroll_version_id)
 		VALUES (?, ?)`,
 			artShapeID, scrollVerID)
 		checkErr(err, img)
@@ -183,7 +183,7 @@ WHERE filename LIKE "` + img + `%"`)
 
 		data, err = tx.Exec(
 			`
-	INSERT INTO artefact_data_owner (artefact_data_id, scroll_version_id)
+	INSERT IGNORE INTO artefact_data_owner (artefact_data_id, scroll_version_id)
 		VALUES (?, ?)`,
 			artDataID, scrollVerID)
 		checkErr(err, img)

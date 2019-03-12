@@ -92,7 +92,13 @@ read_loop: LOOP
 
     insert into scroll (scroll_id) values (null);
     SET @scroll_id = LAST_INSERT_ID();
-    insert into scroll_data (name, scroll_id) values (comp, @scroll_id);
+    insert into scroll_data (name, scroll_id) values (comp, @scroll_id) on duplicate key update scroll_data_id = LAST_INSERT_ID(scroll_data_id);
+    SET @scroll_data_id = LAST_INSERT_ID();
+    insert into scroll_version_group (scroll_id, locked) values (@scroll_id, 1) on duplicate key update scroll_version_group_id = LAST_INSERT_ID(scroll_version_group_id);
+    SET @scroll_version_group_id = LAST_INSERT_ID();
+    insert into scroll_version (user_id, scroll_version_group_id) values (1, @scroll_version_group_id) on duplicate key update scroll_version_id = LAST_INSERT_ID(scroll_version_id);
+    set @scroll_version_id = LAST_INSERT_ID();
+    insert ignore into scroll_data_owner (scroll_data_id, scroll_version_id) values (@scroll_data_id, @scroll_version_id);
     update edition_catalog set scroll_id = @scroll_id where manuscript = comp and scroll_id is NULL;
 
 END LOOP;
