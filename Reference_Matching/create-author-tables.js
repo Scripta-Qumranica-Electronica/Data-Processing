@@ -13,21 +13,21 @@ const createTables = async () => {
 
         // Create all edition_catalog_owner entries
         await pool.query(`
-INSERT IGNORE INTO edition_catalog_author (edition_catalog_id, user_id)
-SELECT DISTINCT edition_catalog.edition_catalog_id, 1
-FROM edition_catalog
+INSERT IGNORE INTO image_catalog_author (image_catalog_id, user_id)
+SELECT image_catalog_id, 1
+FROM image_catalog
         `)
 
         // Create all possible image_catalog_owner entries
         await pool.query(`
-INSERT IGNORE INTO image_catalog_owner (image_catalog_id, user_id)
+INSERT IGNORE INTO image_catalog_author (image_catalog_id, user_id)
 SELECT DISTINCT image_catalog.image_catalog_id, 1
 FROM image_catalog
         `)
 
         // Create all possible SQE_image_owner entries
         await pool.query(`
-INSERT IGNORE INTO SQE_image_owner (sqe_image_id, user_id)
+INSERT IGNORE INTO SQE_image_author (sqe_image_id, user_id)
 SELECT DISTINCT SQE_image.sqe_image_id, 1
 FROM SQE_image
         `)
