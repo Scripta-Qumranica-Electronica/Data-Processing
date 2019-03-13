@@ -29,14 +29,15 @@ const parseListingFile = async () => {
 
         await Promise.all(listings.map(async listing => await savePair(listing)))
 
-        const scroll = await pool.query(`
-    INSERT IGNORE INTO edition_catalog_owner (edition_catalog_id, scroll_version_id)
-    SELECT DISTINCT edition_catalog_id, scroll_version_id
-    FROM edition_catalog
-    JOIN scroll_data USING(scroll_id)
-    JOIN scroll_data_owner USING(scroll_data_id)
-    JOIN scroll_version USING(scroll_version_id)
-    WHERE scroll_version.user_id = 1`)
+        await pool.query(`
+    INSERT IGNORE INTO edition_catalog_author (edition_catalog_id, user_id)
+    SELECT DISTINCT edition_catalog_id, 1
+    FROM edition_catalog`)
+
+        await pool.query(`
+    INSERT IGNORE INTO edition_catalog_to_col_confirmation (edition_catalog_to_col_id)
+    SELECT DISTINCT edition_catalog_to_col_id
+    FROM edition_catalog_to_col`)
 
         console.log(`Processed ${count} entries.`)
         process.exit(0)

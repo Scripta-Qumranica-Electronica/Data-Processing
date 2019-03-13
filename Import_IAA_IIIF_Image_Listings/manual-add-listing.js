@@ -41,7 +41,7 @@ const createEntry = async (entry, side) => {
 
             const image = await pool.query(`
             INSERT INTO image_catalog (institution, catalog_number_1, catalog_number_2, catalog_side)
-            VALUES('${entry.institution}', ${entry.IAA_plate}, ${entry.IAA_fragment}, ${side})
+            VALUES('${entry.Institution}', ${entry.IAA_plate}, ${entry.IAA_fragment}, ${side})
             ON DUPLICATE KEY UPDATE image_catalog_id = LAST_INSERT_ID(image_catalog_id)
             `)
 

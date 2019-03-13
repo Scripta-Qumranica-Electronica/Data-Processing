@@ -17,14 +17,15 @@ const cleanDB = async () => {
             TRUNCATE TABLE artefact_stack;
             TRUNCATE TABLE artefact_stack_owner;
             TRUNCATE TABLE image_catalog;
-            TRUNCATE TABLE image_catalog_owner;
+            TRUNCATE TABLE image_catalog_author;
             TRUNCATE TABLE image_to_image_map;
             TRUNCATE TABLE edition_catalog;
-            TRUNCATE TABLE edition_catalog_owner;
+            TRUNCATE TABLE edition_catalog_author;
             TRUNCATE TABLE edition_catalog_to_col;
+            TRUNCATE TABLE edition_catalog_to_col_confirmation;
             TRUNCATE TABLE image_to_edition_catalog;
             TRUNCATE TABLE SQE_image;
-            TRUNCATE TABLE SQE_image_owner;
+            TRUNCATE TABLE SQE_image_author;
             SET FOREIGN_KEY_CHECKS=1;
         `
         console.log(`\n`)
