@@ -60,6 +60,7 @@ func main() {
 
     wg.Wait()
     bar.FinishPrint("Finished inserting records.")
+
 	//println("Finished inserting records.")
 	if len(failedFiles) > 0 {
 		println("Some files failed.")
@@ -145,56 +146,80 @@ WHERE filename LIKE "` + img + `%"`)
             log.Fatal(err)
         }
         artID := artefactID.Int64
-        if (artID == 0) {
-            data, err := tx.Exec(
-			`
+        if (artID == 0) { // If no artefact exists, create a new one
+            data, err := tx.Exec(`
             INSERT INTO artefact ()
             VALUES ()`)
             checkErr(err, img)
             artID, err = data.LastInsertId()
+
+            data, err = tx.Exec(`
+            INSERT INTO artefact_shape (artefact_id, region_in_sqe_image, id_of_sqe_image)
+                VALUES (?, ST_GeomFromGeoJSON(?), ?)
+            ON DUPLICATE KEY UPDATE artefact_shape_id=LAST_INSERT_ID(artefact_shape_id)`,
+                artID, record, sqeID)
+            checkErr(err, img)
+            var artShapeID int64
+            artShapeID, err = data.LastInsertId()
+
+            data, err = tx.Exec(`
+            INSERT IGNORE INTO artefact_shape_owner (artefact_shape_id, scroll_version_id)
+                VALUES (?, ?)`,
+                artShapeID, scrollVerID)
+            checkErr(err, img)
+
+            data, err = tx.Exec(`
+            INSERT INTO artefact_data (artefact_id, name)
+                VALUES (?, ?)
+            ON DUPLICATE KEY UPDATE artefact_data_id=LAST_INSERT_ID(artefact_data_id)`,
+                artID, fmt.Sprintf("%s - %s - %s", composition.String, loc_1.String, loc_2.String))
+            checkErr(err, img)
+            var artDataID int64
+            artDataID, err = data.LastInsertId()
+
+            data, err = tx.Exec(`
+            INSERT IGNORE INTO artefact_data_owner (artefact_data_id, scroll_version_id)
+            VALUES (?, ?)`,
+                artDataID, scrollVerID)
+            checkErr(err, img)
+        } else { // Since an artefact already exists, check if it is the same as the one we are loading
+            data, err := db.Query(
+			`
+            SELECT ST_EQUALS(region_in_sqe_image, ST_GeomFromGeoJSON(?)) AS equal, artefact_shape_id
+            FROM artefact_shape
+            WHERE artefact_id = ?`, record, artID)
+            checkErr(err, img)
+            var equal int64
+            var artefact_shape_id_orig int64
+            for data.Next() {
+                err = data.Scan(&equal, &artefact_shape_id_orig)
+                checkErr(err, "n")
+            }
+            // If the new polygon is different, then replace the old one, if not, then do nothing
+            if (equal == 0) {
+                data, err := tx.Exec(`
+                INSERT INTO artefact_shape (artefact_id, region_in_sqe_image, id_of_sqe_image)
+                    VALUES (?, ST_GeomFromGeoJSON(?), ?)
+                ON DUPLICATE KEY UPDATE artefact_shape_id=LAST_INSERT_ID(artefact_shape_id)`,
+                    artID, record, sqeID)
+                checkErr(err, img)
+                var artShapeID int64
+                artShapeID, err = data.LastInsertId()
+                checkErr(err, "n")
+                data, err = tx.Exec(`
+                UPDATE artefact_shape_owner
+                SET artefact_shape_id = ?
+                WHERE artefact_shape_id = ? AND scroll_version_id = ?`,
+                    artShapeID, artefact_shape_id_orig, scrollVerID)
+                checkErr(err, img)
+            }
         }
-
-		data, err := tx.Exec(
-			`
-	INSERT INTO artefact_shape (artefact_id, region_in_sqe_image, id_of_sqe_image)
-		VALUES (?, ST_GeomFromGeoJSON(?), ?)
-    ON DUPLICATE KEY UPDATE artefact_shape_id=LAST_INSERT_ID(artefact_shape_id)`,
-			artID, record, sqeID)
-		checkErr(err, img)
-        var artShapeID int64
-		artShapeID, err = data.LastInsertId()
-
-		data, err = tx.Exec(
-			`
-	INSERT IGNORE INTO artefact_shape_owner (artefact_shape_id, scroll_version_id)
-		VALUES (?, ?)`,
-			artShapeID, scrollVerID)
-		checkErr(err, img)
-
-		data, err = tx.Exec(
-			`
-	INSERT INTO artefact_data (artefact_id, name)
-		VALUES (?, ?)
-	ON DUPLICATE KEY UPDATE artefact_data_id=LAST_INSERT_ID(artefact_data_id)`,
-			artID, fmt.Sprintf("%s - %s - %s", composition.String, loc_1.String, loc_2.String))
-		checkErr(err, img)
-		var artDataID int64
-		artDataID, err = data.LastInsertId()
-
-		data, err = tx.Exec(
-			`
-	INSERT IGNORE INTO artefact_data_owner (artefact_data_id, scroll_version_id)
-		VALUES (?, ?)`,
-			artDataID, scrollVerID)
-		checkErr(err, img)
-
-		//println("Done with: " + img)
-        bar.Increment()
 
         err = tx.Commit()
         if err != nil {
             log.Fatal(err)
         }
+        bar.Increment()
 	} else {
 		failedFiles = append(failedFiles, img)
 		//println("Failed with: " + img)

@@ -26,6 +26,8 @@ sv_cursor = db.cursor()
 svQuery = """
 SELECT DISTINCT scroll_version_id
 FROM artefact_shape_owner
+JOIN scroll_version USING(scroll_version_id)
+WHERE scroll_version.user_id = (SELECT user_id FROM user WHERE user_name = "sqe_api")
 """
 sv_cursor.execute(svQuery)
 for (scroll_version_id) in tqdm(list(sv_cursor)):
@@ -76,18 +78,31 @@ for (scroll_version_id) in tqdm(list(sv_cursor)):
         try:
             db2 = cnxpool.get_connection()
             cursor2 = db2.cursor()
-            query2 = """INSERT INTO artefact_position (artefact_id, transform_matrix)
-                        VALUES (%s, '%s')
-                        ON DUPLICATE KEY UPDATE artefact_position_id=LAST_INSERT_ID(artefact_position_id)"""
-            cursor2.execute(query2 % (int(art_id), json.dumps(matrix)))
-            db2.commit()
-            # print("The last inserted id was: ", cursor2.lastrowid)
-            query3 = """INSERT IGNORE INTO artefact_position_owner (artefact_position_id, scroll_version_id)
-                        VALUES (%s, %s)"""
-            # print(query3 % (cursor2.lastrowid, scroll_version_id[0]))
-            cursor2.execute(query3 % (cursor2.lastrowid, scroll_version_id[0]))
-            db2.commit()
-            cursor2 .close()
+            checkExist = """SELECT transform_matrix
+            FROM artefact_position
+            JOIN artefact_position_owner USING(artefact_position_id)
+            WHERE artefact_position.artefact_id = %s
+                AND artefact_position_owner.scroll_version_id = %s"""
+            cursor2.execute(checkExist % (int(art_id), scroll_version_id[0]))
+            exists = False
+            for (transform_matrix) in cursor2:
+                if transform_matrix[0] == json.dumps(matrix):
+                    exists = True
+
+            if not exists:
+                query2 = """INSERT INTO artefact_position (artefact_id, transform_matrix)
+                            VALUES (%s, '%s')
+                            ON DUPLICATE KEY UPDATE artefact_position_id=LAST_INSERT_ID(artefact_position_id)"""
+                cursor2.execute(query2 % (int(art_id), json.dumps(matrix)))
+                db2.commit()
+                # print("The last inserted id was: ", cursor2.lastrowid)
+                query3 = """INSERT IGNORE INTO artefact_position_owner (artefact_position_id, scroll_version_id)
+                            VALUES (%s, %s)"""
+                # print(query3 % (cursor2.lastrowid, scroll_version_id[0]))
+                cursor2.execute(query3 % (cursor2.lastrowid, scroll_version_id[0]))
+                db2.commit()
+
+            cursor2.close()
             db2.close()
         except mysql.connector.Error as error:
             # print("Failed: ", art_id)

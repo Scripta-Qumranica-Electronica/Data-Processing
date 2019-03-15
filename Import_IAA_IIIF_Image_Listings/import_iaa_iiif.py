@@ -156,6 +156,30 @@ def main(argv):
                     unprocessed.append(line + " " + institution + " " + number_1 + " " + number_2)
         except:
             unprocessed.append(line)
+    print("Writing the image_to_image_maps.")
+    sql = """
+        INSERT IGNORE INTO image_to_image_map (image1_id, image2_id, region_on_image1, region_on_image2)
+        SELECT  sqe1.sqe_image_id,
+                sqe2.sqe_image_id,
+                PolygonFromText(CONCAT('POLYGON((0 0,', sqe1.native_width, ' 0,', sqe1.native_width, ' ', sqe1.native_height, ',0 ', sqe1.native_height, ',0 0))')),
+                PolygonFromText(CONCAT('POLYGON((0 0,', sqe2.native_width, ' 0,', sqe2.native_width, ' ', sqe2.native_height, ',0 ', sqe2.native_height, ',0 0))'))
+        FROM SQE_image sqe1
+        JOIN SQE_image sqe2 ON sqe2.image_catalog_id = sqe1.image_catalog_id
+            AND sqe2.sqe_image_id != sqe1.sqe_image_id
+        WHERE sqe1.is_master = 1
+        """
+    cursor.execute(sql)
+    db.commit()
+    sql = """
+        INSERT INTO image_to_image_map_author (image_to_image_map_id, user_id)
+        SELECT image_to_image_map.image_to_image_map_id, (SELECT user_id FROM user WHERE user_name = "sqe_api")
+        FROM image_to_image_map
+        LEFT JOIN image_to_image_map_author ON image_to_image_map_author.image_to_image_map_id = image_to_image_map.image_to_image_map_id
+            AND image_to_image_map_author.user_id = (SELECT user_id FROM user WHERE user_name = "sqe_api")
+        WHERE image_to_image_map_author.image_to_image_map_id IS NULL
+        """
+    cursor.execute(sql)
+    db.commit()
     cursor.close()
     db.close()
     with open('import_failed.txt', 'w') as f:
