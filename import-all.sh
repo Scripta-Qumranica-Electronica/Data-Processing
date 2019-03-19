@@ -5,11 +5,11 @@ yarn load
 
 cd ../Import_IAA_IIIF_Image_Listings
 node manual-add-listing.js -f manual-data/4Q259-additions.csv
-python3 import_iaa_iiif.py -i NLI-IAA-data/newlist22.11.18.csv -d SQE_DEV
+python3 import_iaa_iiif.py -i NLI-IAA-data/iaa-iiif-files-19_3_2019.txt -d SQE_DEV
 
 cd ../Reference_Matching
 node link-scroll-ids.js
-node create-owner-tables.js
+node create-author-tables.js
 yarn parse
 node load-matches
 

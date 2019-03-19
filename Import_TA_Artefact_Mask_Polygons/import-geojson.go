@@ -15,6 +15,7 @@ import (
     "sync"
     "time"
     "gopkg.in/cheggaaa/pb.v1"
+    "os"
 
 	//"github.com/Bronson-Brown-deVost/gosqljson"
 	"fmt"
@@ -61,16 +62,47 @@ func main() {
     wg.Wait()
     bar.FinishPrint("Finished inserting records.")
 
-	//println("Finished inserting records.")
+    println("Creating artefact_stack entries")
+    db.Query(`
+    INSERT IGNORE INTO artefact_stack (artefact_A_id, artefact_B_id)
+    SELECT DISTINCT as1.artefact_id, as2.artefact_id
+    FROM artefact_shape as1
+    JOIN SQE_image si1 ON si1.sqe_image_id = as1.id_of_sqe_image
+    JOIN image_catalog ic1 ON ic1.image_catalog_id = si1.image_catalog_id
+    AND ic1.catalog_side = 0
+    JOIN image_catalog ic2 ON ic1.institution = ic2.institution
+        AND ic1.catalog_number_1 = ic2.catalog_number_1
+        AND ic1.catalog_number_2 = ic2.catalog_number_2
+        AND ic1.catalog_side = MOD(ic2.catalog_side + 1, 2)
+    JOIN SQE_image si2 ON si2.image_catalog_id = ic2.image_catalog_id
+        AND si2.is_master = 1
+    JOIN artefact_shape as2 ON as2.id_of_sqe_image = si2.sqe_image_id
+        AND as2.artefact_id != as1.artefact_id
+    `)
+
+    db.Query(`
+    INSERT INTO artefact_stack_owner (artefact_stack_id, scroll_version_id)
+    SELECT DISTINCT artefact_stack.artefact_stack_id, artefact_shape_owner.scroll_version_id
+    FROM artefact_stack
+    JOIN artefact_shape ON artefact_stack.artefact_A_id = artefact_shape.artefact_shape_id
+    JOIN artefact_shape_owner USING(artefact_shape_id)
+    JOIN scroll_version USING(scroll_version_id)
+    WHERE scroll_version.user_id = (SELECT user_id FROM user WHERE user_name = "sqe_api")
+    `)
+	println("Finished inserting artefact_stack entries.")
 	if len(failedFiles) > 0 {
 		println("Some files failed.")
-		for _, v := range failedFiles {
-			println(fmt.Sprintf("%s", v))
-		}
+        f, err := os.Create("failed_artefact_import.txt")
+        checkErr(err, "Failed to create file.")
+
+        for _, v := range failedFiles {
+            fmt.Fprintln(f, v)
+            checkErr(err, v)
+        }
+        err = f.Close()
+        checkErr(err, "Failed to close file.")
         println(len(failedFiles), " files failed to load.")
 	}
-
-	// insertRecord(record, filename)
 }
 
 func checkErr(err error, img string) {

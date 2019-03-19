@@ -51,10 +51,10 @@ def main(argv):
     lines = [line.rstrip('\n') for line in open(inputfile)]
     for line in tqdm(lines):
         try:
-            req = requests.get('https://www.qumranica.org/image-proxy?address=http://192.114.7.208:8182/iiif/2/' + line + '/info.json')
-            resp = req.json()
-            height = resp["height"]
-            width = resp["width"]
+            # req = requests.get('https://www.qumranica.org/image-proxy?address=http://192.114.7.208:8182/iiif/2/' + line + '/info.json')
+            # resp = req.json()
+            height = 7216#resp["height"]
+            width = 5412#resp["width"]
             m = re.search(r'([X|\*]{0,1}\d{1,5}.*)(-Fg|Fg)(\d{1,5}).*-(R|V)-.*(LR445|LR924|ML445|ML924|_026|_028)', line)
             if m is not None and len(m.groups(0)) == 5:
                 plate = str(m.group(1).replace('Rec', '').replace('Vrs', '').replace('_', '/').replace('X', '*').replace('-', '/').rstrip('/'))
@@ -156,6 +156,46 @@ def main(argv):
                     unprocessed.append(line + " " + institution + " " + number_1 + " " + number_2)
         except:
             unprocessed.append(line)
+    print("Collecting tiled images.")
+    sql = """
+        SELECT image_catalog.institution, image_catalog.catalog_number_1 AS plate, image_catalog.catalog_number_2 AS fragment,  IF(image_catalog.catalog_side = 0, 'R', 'V') AS side, filename
+        FROM SQE_image
+        JOIN image_catalog USING(image_catalog_id)
+        WHERE image_catalog_id in (
+                    SELECT image_catalog_id
+                    FROM (
+                        SELECT image_catalog_id
+                        FROM SQE_image
+                        GROUP BY image_catalog_id
+                        HAVING COUNT(sqe_image_id) > 4
+                        ) t
+                )
+        """
+    cursor.execute(sql)
+    results = cursor.fetchall()
+    with open('tiled_images.csv', 'w') as f:
+        f.write("%s\n" % 'institution,plate,fragment,side,filename')
+        for entry in results:
+            f.write("%s\n" % ','.join(map(str, entry)))
+
+    db.commit()
+
+    print("Deleting tiled images.")
+    sql = """
+        DELETE FROM SQE_image
+        WHERE image_catalog_id in (
+            SELECT image_catalog_id
+            FROM (
+                SELECT image_catalog_id
+                FROM SQE_image
+                GROUP BY image_catalog_id
+                HAVING COUNT(sqe_image_id) > 4
+            ) t
+        )
+        """
+    cursor.execute(sql)
+    db.commit()
+
     print("Writing the image_to_image_maps.")
     sql = """
         INSERT IGNORE INTO image_to_image_map (image1_id, image2_id, region_on_image1, region_on_image2)

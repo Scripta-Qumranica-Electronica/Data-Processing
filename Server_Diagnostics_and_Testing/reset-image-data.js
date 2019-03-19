@@ -24,6 +24,8 @@ const cleanDB = async () => {
             TRUNCATE TABLE edition_catalog_to_col;
             TRUNCATE TABLE edition_catalog_to_col_confirmation;
             TRUNCATE TABLE image_to_edition_catalog;
+            TRUNCATE TABLE image_to_image_map;
+            TRUNCATE TABLE image_to_image_map_author;
             TRUNCATE TABLE SQE_image;
             TRUNCATE TABLE SQE_image_author;
             SET FOREIGN_KEY_CHECKS=1;
