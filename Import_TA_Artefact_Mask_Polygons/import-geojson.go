@@ -34,10 +34,16 @@ var failedFiles []string
 var polygons struct {
 	Type        string    `json:"type"`
 	Coordinates [][][]int `json:"coordinates"`
+}	
+
+type file struct {
+    info    os.FileInfo
+    path    string
 }
 
+
 func init() {
-	db, err = sql.Open("mysql", "root:none@tcp(localhost:3307)/SQE_DEV?charset=utf8")
+	db, err = sql.Open("mysql", "root:none@tcp(localhost:3307)/SQE?charset=utf8")
 	checkErr(err, "n")
 	db.SetMaxOpenConns(maxConns)
     db.SetMaxIdleConns(50)
@@ -46,17 +52,29 @@ func init() {
 
 func main() {
     defer db.Close()
-	dir := "./Data/No-japanese-paper-10-18/"
+	dir := "./Data/No-japanese-paper-4-6-2019/"
     absPath, _ := filepath.Abs(dir)
-	files, err := ioutil.ReadDir(absPath)
+    var files []file
+	err := filepath.Walk(absPath, func(path string, info os.FileInfo, err error) error {
+        if !info.IsDir() {
+            files = append(files, file{info: info, path: path})
+        }
+        return nil
+    })
 	if err != nil {
 		log.Fatal(err)
 	}
 
+    // for _, f := range files {
+    //     println(f.path)
+    //     println(f.info.Name())
+    // }
+
     bar := pb.StartNew(len(files))
 	for _, f := range files {
         wg.Add(1)
-		readFile(dir, f.Name(), &wg, bar)
+        var file, dir = filepath.Split(f.path)
+		readFile(file, dir, &wg, bar)
 	}
 
     wg.Wait()
@@ -145,6 +163,7 @@ func insertRecord(record string, dir string, filename string, wg * sync.WaitGrou
 	img := strings.Split(filename, "json")[0]
 	img = strings.Replace(img, " ", "", -1)
 
+    // Get the reference data for this imaged object (via filename without the file extension)
 	rows, err := db.Query(`
 SELECT sqe_image_id,
 	manuscript,
@@ -153,10 +172,10 @@ SELECT sqe_image_id,
 	scroll_version_id,
     artefact_id
 FROM SQE_image
-    LEFT JOIN image_to_edition_catalog USING(image_catalog_id)
-	LEFT JOIN edition_catalog USING(edition_catalog_id)
-	LEFT JOIN scroll_version_group USING(scroll_id)
-	LEFT JOIN scroll_version USING(scroll_version_group_id)
+    LEFT JOIN image_to_iaa_edition_catalog USING(image_catalog_id)
+	LEFT JOIN iaa_edition_catalog USING(edition_catalog_id)
+	LEFT JOIN edition USING(scroll_id)
+	LEFT JOIN edition_editor USING(edition_id)
     LEFT JOIN artefact_shape ON artefact_shape.id_of_sqe_image = SQE_image.sqe_image_id
 WHERE filename LIKE "` + img + `%"`)
 	checkErr(err, "n")
@@ -178,7 +197,7 @@ WHERE filename LIKE "` + img + `%"`)
             log.Fatal(err)
         }
         artID := artefactID.Int64
-        if (artID == 0) { // If no artefact exists, create a new one
+        if (!artefactID.Valid) { // If no artefact exists, create a new one
             data, err := tx.Exec(`
             INSERT INTO artefact ()
             VALUES ()`)
@@ -254,7 +273,6 @@ WHERE filename LIKE "` + img + `%"`)
         bar.Increment()
 	} else {
 		failedFiles = append(failedFiles, img)
-		//println("Failed with: " + img)
         bar.Increment()
 	}
     connsInUse -= 1
