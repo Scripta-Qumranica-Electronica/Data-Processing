@@ -13,7 +13,7 @@ const createTables = async () => {
 
         // Create all edition_catalog_owner entries
         await pool.query(`
-INSERT IGNORE INTO edition_catalog_author (edition_catalog_id, user_id)
+INSERT IGNORE INTO iaa_edition_catalog_author (iaa_edition_catalog_id, user_id)
 SELECT edition_catalog_id, 1
 FROM edition_catalog
         `)

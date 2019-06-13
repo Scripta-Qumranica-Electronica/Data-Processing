@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
     "path/filepath"
+    "flag"
 	"log"
 	"strings"
     "sync"
@@ -27,6 +28,7 @@ import (
 var db *sql.DB
 var maxConns = 80
 var connsInUse = 0
+var dir string
 var wg sync.WaitGroup
 var err error
 var failedFiles []string
@@ -34,7 +36,7 @@ var failedFiles []string
 var polygons struct {
 	Type        string    `json:"type"`
 	Coordinates [][][]int `json:"coordinates"`
-}	
+}
 
 type file struct {
     info    os.FileInfo
@@ -43,7 +45,14 @@ type file struct {
 
 
 func init() {
-	db, err = sql.Open("mysql", "root:none@tcp(localhost:3307)/SQE?charset=utf8")
+    dbConnPtr := flag.String("db", "root:none@tcp(localhost:3307)/SQE?charset=utf8", "the connection string settings for connection to the database")
+    dataFolderPtr := flag.String("data", "./Data/No-japanese-paper-4-6-2019/", "the folder containing the data to be imported")
+    flag.Parse()
+    dir = *dataFolderPtr
+    dbConn := *dbConnPtr
+    println("The database connection string is: " + dbConn)
+
+	db, err = sql.Open("mysql", dbConn)
 	checkErr(err, "n")
 	db.SetMaxOpenConns(maxConns)
     db.SetMaxIdleConns(50)
@@ -52,8 +61,12 @@ func init() {
 
 func main() {
     defer db.Close()
-	dir := "./Data/No-japanese-paper-4-6-2019/"
+    println("The data folder is: " + dir)
     absPath, _ := filepath.Abs(dir)
+    if _, err := os.Stat(absPath); os.IsNotExist(err) {
+        println("The folder " + absPath + " does not exist.")
+        os.Exit(1)
+    }
     var files []file
 	err := filepath.Walk(absPath, func(path string, info os.FileInfo, err error) error {
         if !info.IsDir() {
@@ -85,7 +98,7 @@ func main() {
     INSERT IGNORE INTO artefact_stack (artefact_A_id, artefact_B_id)
     SELECT DISTINCT as1.artefact_id, as2.artefact_id
     FROM artefact_shape as1
-    JOIN SQE_image si1 ON si1.sqe_image_id = as1.id_of_sqe_image
+    JOIN SQE_image si1 ON si1.sqe_image_id = as1.sqe_image_id
     JOIN image_catalog ic1 ON ic1.image_catalog_id = si1.image_catalog_id
     AND ic1.catalog_side = 0
     JOIN image_catalog ic2 ON ic1.institution = ic2.institution
@@ -94,18 +107,18 @@ func main() {
         AND ic1.catalog_side = MOD(ic2.catalog_side + 1, 2)
     JOIN SQE_image si2 ON si2.image_catalog_id = ic2.image_catalog_id
         AND si2.is_master = 1
-    JOIN artefact_shape as2 ON as2.id_of_sqe_image = si2.sqe_image_id
+    JOIN artefact_shape as2 ON as2.sqe_image_id = si2.sqe_image_id
         AND as2.artefact_id != as1.artefact_id
     `)
 
     db.Query(`
-    INSERT INTO artefact_stack_owner (artefact_stack_id, scroll_version_id)
-    SELECT DISTINCT artefact_stack.artefact_stack_id, artefact_shape_owner.scroll_version_id
+    INSERT INTO artefact_stack_owner (artefact_stack_id, edition_id, edition_editor_id)
+    SELECT DISTINCT artefact_stack.artefact_stack_id, artefact_shape_owner.edition_id, artefact_shape_owner.edition_editor_id
     FROM artefact_stack
     JOIN artefact_shape ON artefact_stack.artefact_A_id = artefact_shape.artefact_shape_id
     JOIN artefact_shape_owner USING(artefact_shape_id)
-    JOIN scroll_version USING(scroll_version_id)
-    WHERE scroll_version.user_id = (SELECT user_id FROM user WHERE user_name = "sqe_api")
+    JOIN edition_editor_id USING(edition_id)
+    WHERE edition_editor_id.user_id = (SELECT user_id FROM user WHERE user_name = "sqe_api")
     `)
 	println("Finished inserting artefact_stack entries.")
 	if len(failedFiles) > 0 {
@@ -159,35 +172,35 @@ func insertRecord(record string, dir string, filename string, wg * sync.WaitGrou
         time.Sleep(100 * time.Millisecond)
     }
     connsInUse += 1
-	//img := strings.Split(filename, "/")[4]
-	img := strings.Split(filename, "json")[0]
-	img = strings.Replace(img, " ", "", -1)
+	img := strings.Split(filename, ".json")[0]
 
     // Get the reference data for this imaged object (via filename without the file extension)
 	rows, err := db.Query(`
-SELECT sqe_image_id,
+SELECT SQE_image.sqe_image_id AS sqe_image_id,
 	manuscript,
 	edition_location_1,
 	edition_location_2,
-	scroll_version_id,
+	edition.edition_id AS edition_id,
+    edition_editor.edition_editor_id AS edition_editor_id,
     artefact_id
 FROM SQE_image
     LEFT JOIN image_to_iaa_edition_catalog USING(image_catalog_id)
-	LEFT JOIN iaa_edition_catalog USING(edition_catalog_id)
+	LEFT JOIN iaa_edition_catalog USING(iaa_edition_catalog_id)
 	LEFT JOIN edition USING(scroll_id)
 	LEFT JOIN edition_editor USING(edition_id)
-    LEFT JOIN artefact_shape ON artefact_shape.id_of_sqe_image = SQE_image.sqe_image_id
-WHERE filename LIKE "` + img + `%"`)
+    LEFT JOIN artefact_shape USING(sqe_image_id)
+WHERE REPLACE(filename, ' ', '') LIKE REPLACE("` + img + `%", ' ', '')`)
 	checkErr(err, "n")
     defer rows.Close()
 	var sqeID int
 	var composition sql.NullString
 	var loc_1 sql.NullString
 	var loc_2 sql.NullString
-	var scrollVerID sql.NullInt64
+	var editionID sql.NullInt64
+	var editionEditorID sql.NullInt64
     var artefactID sql.NullInt64
 	for rows.Next() {
-		err = rows.Scan(&sqeID, &composition, &loc_1, &loc_2, &scrollVerID, &artefactID)
+		err = rows.Scan(&sqeID, &composition, &loc_1, &loc_2, &editionID, &editionEditorID, &artefactID)
 		checkErr(err, "n")
 	}
 
@@ -205,7 +218,7 @@ WHERE filename LIKE "` + img + `%"`)
             artID, err = data.LastInsertId()
 
             data, err = tx.Exec(`
-            INSERT INTO artefact_shape (artefact_id, region_in_sqe_image, id_of_sqe_image)
+            INSERT INTO artefact_shape (artefact_id, region_in_sqe_image, sqe_image_id)
                 VALUES (?, ST_GeomFromGeoJSON(?), ?)
             ON DUPLICATE KEY UPDATE artefact_shape_id=LAST_INSERT_ID(artefact_shape_id)`,
                 artID, record, sqeID)
@@ -214,9 +227,9 @@ WHERE filename LIKE "` + img + `%"`)
             artShapeID, err = data.LastInsertId()
 
             data, err = tx.Exec(`
-            INSERT IGNORE INTO artefact_shape_owner (artefact_shape_id, scroll_version_id)
-                VALUES (?, ?)`,
-                artShapeID, scrollVerID)
+            INSERT IGNORE INTO artefact_shape_owner (artefact_shape_id, edition_id, edition_editor_id)
+                VALUES (?, ?, ?)`,
+                artShapeID, editionID, editionEditorID)
             checkErr(err, img)
 
             data, err = tx.Exec(`
@@ -229,9 +242,9 @@ WHERE filename LIKE "` + img + `%"`)
             artDataID, err = data.LastInsertId()
 
             data, err = tx.Exec(`
-            INSERT IGNORE INTO artefact_data_owner (artefact_data_id, scroll_version_id)
-            VALUES (?, ?)`,
-                artDataID, scrollVerID)
+            INSERT IGNORE INTO artefact_data_owner (artefact_data_id,  edition_id, edition_editor_id)
+            VALUES (?, ?, ?)`,
+                artDataID, editionID, editionEditorID)
             checkErr(err, img)
         } else { // Since an artefact already exists, check if it is the same as the one we are loading
             data, err := db.Query(
@@ -249,7 +262,7 @@ WHERE filename LIKE "` + img + `%"`)
             // If the new polygon is different, then replace the old one, if not, then do nothing
             if (equal == 0) {
                 data, err := tx.Exec(`
-                INSERT INTO artefact_shape (artefact_id, region_in_sqe_image, id_of_sqe_image)
+                INSERT INTO artefact_shape (artefact_id, region_in_sqe_image, sqe_image_id)
                     VALUES (?, ST_GeomFromGeoJSON(?), ?)
                 ON DUPLICATE KEY UPDATE artefact_shape_id=LAST_INSERT_ID(artefact_shape_id)`,
                     artID, record, sqeID)
@@ -260,8 +273,8 @@ WHERE filename LIKE "` + img + `%"`)
                 data, err = tx.Exec(`
                 UPDATE artefact_shape_owner
                 SET artefact_shape_id = ?
-                WHERE artefact_shape_id = ? AND scroll_version_id = ?`,
-                    artShapeID, artefact_shape_id_orig, scrollVerID)
+                WHERE artefact_shape_id = ? AND edition_id = ?`,
+                    artShapeID, artefact_shape_id_orig, editionID)
                 checkErr(err, img)
             }
         }

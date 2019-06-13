@@ -45,7 +45,7 @@ const processMatches = () => {
     }
     const matchLength = matches.length
     matches = toCSV([
-      ['edition_catalog_id', 'col_id'],
+      ['iaa_edition_catalog_id', 'col_id'],
       ...matches
     ])
     fs.writeFile('matches.csv', matches, (err) => {

@@ -1,5 +1,5 @@
 const mariadb = require('mariadb')
-const pool = mariadb.createPool({host: 'localhost', port:3307, user:'root', password:'none', database: 'SQE_DEV', connectionLimit: 85})
+const pool = mariadb.createPool({host: 'localhost', port:3307, user:'root', password:'none', database: 'SQE', connectionLimit: 85})
 const axios = require('axios')
 const fs = require('fs')
 const readline = require('readline')

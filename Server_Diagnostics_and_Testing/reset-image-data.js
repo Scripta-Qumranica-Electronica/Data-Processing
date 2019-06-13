@@ -1,6 +1,6 @@
 const chalk = require('chalk')
 const mariadb = require('mariadb')
-const pool = mariadb.createPool({host: 'localhost', port:3307, user:'root', password:'none', database: 'SQE_DEV', connectionLimit: 2, multipleStatements: true})
+const pool = mariadb.createPool({host: 'localhost', port:3307, user:'root', password:'none', database: 'SQE', connectionLimit: 2, multipleStatements: true})
 
 const cleanDB = async () => {
     console.log(chalk.blue('Starting to clean image data.'))
@@ -19,11 +19,11 @@ const cleanDB = async () => {
             TRUNCATE TABLE image_catalog;
             TRUNCATE TABLE image_catalog_author;
             TRUNCATE TABLE image_to_image_map;
-            TRUNCATE TABLE edition_catalog;
-            TRUNCATE TABLE edition_catalog_author;
-            TRUNCATE TABLE edition_catalog_to_col;
-            TRUNCATE TABLE edition_catalog_to_col_confirmation;
-            TRUNCATE TABLE image_to_edition_catalog;
+            TRUNCATE TABLE iaa_edition_catalog;
+            TRUNCATE TABLE iaa_edition_catalog_author;
+            TRUNCATE TABLE iaa_edition_catalog_to_col;
+            TRUNCATE TABLE iaa_edition_catalog_to_col_confirmation;
+            TRUNCATE TABLE image_to_iaa_edition_catalog;
             TRUNCATE TABLE image_to_image_map;
             TRUNCATE TABLE image_to_image_map_author;
             TRUNCATE TABLE SQE_image;

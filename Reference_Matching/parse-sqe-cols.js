@@ -17,9 +17,9 @@ console.log(chalk.blue('Connecting to DB.  This may take a moment.'))
 const p = mariadb.createPool({
   host: 'localhost',
   port: 3307,
-  user:'root', 
+  user:'root',
   password: 'none',
-  database: 'SQE_DEV',
+  database: 'SQE',
   connectionLimit: 80
 })
 
@@ -110,7 +110,7 @@ const processRecords = async () => {
             }
         }
         //Output the textColumn object.
-        fs.writeFile('QWB_cols-discrete.json', JSON.stringify(textColumns, null, 2), (err) => {  
+        fs.writeFile('QWB_cols-discrete.json', JSON.stringify(textColumns, null, 2), (err) => {
             // throws an error, you could also catch it here
             if (err) throw err;
 

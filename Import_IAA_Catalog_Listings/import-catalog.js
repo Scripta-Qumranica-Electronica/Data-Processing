@@ -6,7 +6,7 @@ const pool = mariadb.createPool({
      user:'root',
      password: 'none',
      connectionLimit: 75,
-     database: "SQE_DEV"
+     database: "SQE"
 })
 const _cliProgress = require('cli-progress')
 const bar = new _cliProgress.Bar({}, _cliProgress.Presets.shades_classic)
@@ -91,9 +91,9 @@ const writeEdition = async (edition, side) => {
     try {
         conn = await pool.getConnection()
         const res = await conn.query(
-            `INSERT INTO edition_catalog (manuscript, edition_name, edition_volume, edition_location_1, edition_location_2, edition_side, comment)
+            `INSERT INTO iaa_edition_catalog (manuscript, edition_name, edition_volume, edition_location_1, edition_location_2, edition_side, comment)
                 VALUE (?, ?, ?, ?, ?, ?, ?)
-            ON DUPLICATE KEY UPDATE edition_catalog_id = LAST_INSERT_ID(edition_catalog_id)
+            ON DUPLICATE KEY UPDATE iaa_edition_catalog_id = LAST_INSERT_ID(edition_catalog_id)
             `,
             [
                 edition.manuscript,
@@ -122,7 +122,7 @@ const writeImgEd = async (imageCatNo, editionNo) => {
     try {
         conn = await pool.getConnection()
         const res = await conn.query(
-            `INSERT IGNORE INTO image_to_edition_catalog (image_catalog_id, edition_catalog_id)
+            `INSERT IGNORE INTO image_to_iaa_edition_catalog (image_catalog_id, iaa_edition_catalog_id)
                 VALUE (?, ?)`,
             [
                 imageCatNo,

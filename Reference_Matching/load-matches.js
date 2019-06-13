@@ -18,7 +18,7 @@ const pool = mariadb.createPool({
   port: 3307,
   user:'root',
   password: 'none',
-  database: 'SQE_DEV',
+  database: 'SQE',
   connectionLimit: 80
 })
 
@@ -30,14 +30,14 @@ const parseListingFile = async () => {
         await Promise.all(listings.map(async listing => await savePair(listing)))
 
         await pool.query(`
-    INSERT IGNORE INTO edition_catalog_author (edition_catalog_id, user_id)
-    SELECT DISTINCT edition_catalog_id, 1
-    FROM edition_catalog`)
+    INSERT IGNORE INTO iaa_edition_catalog_author (iaa_edition_catalog_id, user_id)
+    SELECT DISTINCT iaa_edition_catalog_id, 1
+    FROM iaa_edition_catalog`)
 
         await pool.query(`
-    INSERT IGNORE INTO edition_catalog_to_col_confirmation (edition_catalog_to_col_id)
-    SELECT DISTINCT edition_catalog_to_col_id
-    FROM edition_catalog_to_col`)
+    INSERT IGNORE INTO iaa_edition_catalog_to_col_confirmation (iaa_edition_catalog_to_col_id)
+    SELECT DISTINCT iaa_edition_catalog_to_col_id
+    FROM iaa_edition_catalog_to_col`)
 
         console.log(`Processed ${count} entries.`)
         process.exit(0)
@@ -51,9 +51,9 @@ const savePair = async (listing) => {
     try {
         const conn = await pool.getConnection()
         await conn.query(`
-        INSERT IGNORE INTO edition_catalog_to_col (edition_catalog_id, col_id)
+        INSERT IGNORE INTO iaa_edition_catalog_to_col (iaa_edition_catalog_id, col_id)
         VALUES (?, ?)
-        `, [listing.edition_catalog_id, listing.col_id])
+        `, [listing.iaa_edition_catalog_id, listing.col_id])
         conn.end()
         count++
     } catch(err) {

@@ -5,11 +5,11 @@ const pool = mariadb.createPool({
      user:'root',
      password: 'none',
      connectionLimit: 75,
-     database: "SQE_DEV",
+     database: "SQE",
 })
 
 const update = async () => {
-    const schema = 'SQE_DEV'
+    const schema = 'SQE'
     try {
         const tables = await pool.query(`
 SELECT DISTINCT
