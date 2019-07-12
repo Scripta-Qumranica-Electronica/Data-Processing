@@ -95,8 +95,8 @@ func main() {
 
     println("Creating artefact_stack entries")
     db.Query(`
-    INSERT IGNORE INTO artefact_stack (artefact_A_id, artefact_B_id)
-    SELECT DISTINCT as1.artefact_id, as2.artefact_id
+    INSERT IGNORE INTO artefact_stack (artefact_A_id, artefact_B_id, A_is_verso, B_is_verso)
+    SELECT DISTINCT as1.artefact_id, as2.artefact_id, 0, 1
     FROM artefact_shape as1
     JOIN SQE_image si1 ON si1.sqe_image_id = as1.sqe_image_id
     JOIN image_catalog ic1 ON ic1.image_catalog_id = si1.image_catalog_id
@@ -112,13 +112,30 @@ func main() {
     `)
 
     db.Query(`
-    INSERT INTO artefact_stack_owner (artefact_stack_id, edition_id, edition_editor_id)
+    INSERT IGNORE INTO artefact_stack (artefact_A_id, artefact_B_id, A_is_verso, B_is_verso)
+    SELECT DISTINCT as1.artefact_id, as2.artefact_id, 1, 0
+    FROM artefact_shape as1
+    JOIN SQE_image si1 ON si1.sqe_image_id = as1.sqe_image_id
+    JOIN image_catalog ic1 ON ic1.image_catalog_id = si1.image_catalog_id
+    AND ic1.catalog_side = 1
+    JOIN image_catalog ic2 ON ic1.institution = ic2.institution
+        AND ic1.catalog_number_1 = ic2.catalog_number_1
+        AND ic1.catalog_number_2 = ic2.catalog_number_2
+        AND ic1.catalog_side = MOD(ic2.catalog_side + 1, 2)
+    JOIN SQE_image si2 ON si2.image_catalog_id = ic2.image_catalog_id
+        AND si2.is_master = 1
+    JOIN artefact_shape as2 ON as2.sqe_image_id = si2.sqe_image_id
+        AND as2.artefact_id != as1.artefact_id
+    `)
+
+    db.Query(`
+    INSERT IGNORE INTO artefact_stack_owner (artefact_stack_id, edition_id, edition_editor_id)
     SELECT DISTINCT artefact_stack.artefact_stack_id, artefact_shape_owner.edition_id, artefact_shape_owner.edition_editor_id
     FROM artefact_stack
-    JOIN artefact_shape ON artefact_stack.artefact_A_id = artefact_shape.artefact_shape_id
+    JOIN artefact_shape ON artefact_stack.artefact_A_id = artefact_shape.artefact_id
     JOIN artefact_shape_owner USING(artefact_shape_id)
-    JOIN edition_editor_id USING(edition_id)
-    WHERE edition_editor_id.user_id = (SELECT user_id FROM user WHERE user_name = "sqe_api")
+    JOIN edition_editor USING(edition_id)
+    WHERE edition_editor.user_id = (SELECT user_id FROM user WHERE email = "sqe_api")
     `)
 	println("Finished inserting artefact_stack entries.")
 	if len(failedFiles) > 0 {
