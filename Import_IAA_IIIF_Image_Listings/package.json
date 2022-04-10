@@ -4,7 +4,7 @@
     "clui": "^0.3.6",
     "csvtojson": "^2.0.8",
     "mariadb": "^2.0.1-beta",
-    "minimist": "^1.2.0",
+    "minimist": "^1.2.6",
     "single-line-log": "^1.1.2"
   }
 }
